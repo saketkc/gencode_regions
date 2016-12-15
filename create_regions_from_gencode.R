@@ -1,6 +1,9 @@
-library(GenomicFeatures)
+#!/usr/bin/Rscript
 args <- commandArgs(trailingOnly = TRUE)
-
+if (length(args)!=2){
+    stop('Insufficient parameters.\nUsage: ./create_regions_from_gencode.R <gff_file> <output_dir>')
+}
+suppressMessages(library(GenomicFeatures))
 gencode_gff <- args[1]
 output_dir <- args[2]
 
@@ -28,20 +31,22 @@ create_df <- function(gr, filename){
 TxDb <- makeTxDbFromGFF(gencode_gff)
 
 
-exons <- unique(unlist(exons(TxDb, columns='tx_name')))
-introns <- unique(unlist(intronsByTranscript(TxDb)))
-fiveUTRs <- unique(unlist(fiveUTRsByTranscript(TxDb)))
-threeUTRs <- unique(unlist(threeUTRsByTranscript(TxDb)))
-transcripts <- unique(unlist(transcripts(TxDb, columns=NULL)))
-CDS <- unique(unlist(cds(TxDb, columns=NULL)))
-GENES <- unique(unlist(genes(TxDb, columns='tx_name')))
+exons.data <- unique(unlist(exons(TxDb, columns='tx_name')))
+introns.data <- unique(unlist(intronsByTranscript(TxDb)))
+fiveUTRs.data <- unique(unlist(fiveUTRsByTranscript(TxDb)))
+threeUTRs.data <- unique(unlist(threeUTRsByTranscript(TxDb)))
+transcripts.data <- unique(unlist(transcripts(TxDb, columns=NULL)))
+cds.data <- unique(unlist(cds(TxDb, columns=NULL)))
+genes.data <- unique(unlist(genes(TxDb, columns='tx_name')))
+promoters.data <- unique(unlist(promoters(TxDb, upstream=1000, downstream=1000)))
 
-create_df(exons, file.path(output_dir, 'exons.bed'))
-create_df(introns, file.path(output_dir, 'introns.bed'))
-create_df(fiveUTRs, file.path(output_dir, '5UTRs.bed'))
-create_df(threeUTRs, file.path(output_dir, '3UTRs.bed'))
-create_df(transcripts, file.path(output_dir, 'transcripts.bed'))
-create_df(CDS, file.path(output_dir, 'CDS.bed'))
-create_df_names(GENES, file.path(output_dir, 'genes.bed'), 
-                names(mcols(GENES)$tx_name))
+create_df(exons.data, file.path(output_dir, 'exons.bed'))
+create_df(introns.data, file.path(output_dir, 'introns.bed'))
+create_df(fiveUTRs.data, file.path(output_dir, '5UTRs.bed'))
+create_df(threeUTRs.data, file.path(output_dir, '3UTRs.bed'))
+create_df(transcripts.data, file.path(output_dir, 'transcripts.bed'))
+create_df(cds.data, file.path(output_dir, 'cds.bed'))
+create_df(promoters.data, file.path(output_dir, 'promoters.bed'))
+create_df_names(genes.data, file.path(output_dir, 'genes.bed'), 
+                names(mcols(genes.data)$tx_name))
 
