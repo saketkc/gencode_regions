@@ -9,7 +9,7 @@ Extract 3'UTR, 5'UTR, CDS, Promoter, Genes from Gencode files
 ## Run
 
 ```{bash}
-create_regions_from_gencode.R <path_to_GFF> <path_to_output_dir>
+./create_regions_from_gencode.R <path_to_GFF> <path_to_output_dir>
 ```
 
 Will create `exons.bed, 3UTR.bed, 5UTR.bed, genes.bed, cds.bed` in `<output_dir>`
@@ -27,7 +27,7 @@ Will create `exons.bed, 3UTR.bed, 5UTR.bed, genes.bed, cds.bed` in `<output_dir>
 - Create regions:
 
 ```{bash}
-create_regions_from_gencode.R gencode.v25.annotation.gff3 /path/to/GRCh37/annotation
+./create_regions_from_gencode.R gencode.v25.annotation.gff3 /path/to/GRCh37/annotation
 ```
 
 
