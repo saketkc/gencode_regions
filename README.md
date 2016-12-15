@@ -2,15 +2,18 @@
 Extract 3'UTR, 5'UTR, CDS, Promoter, Genes from Gencode files
 
 ## Depedencies
-
+   
 - r>=3.2.1
 - [GenomicFeatures](http://bioconductor.org/packages/release/bioc/html/GenomicFeatures.html)
 
 ## Run:
 
-```create_regions_from_gencode.R <path_to_GFF> <path_to_output_dir>```
+```{bash}
+create_regions_from_gencode.R <path_to_GFF> <path_to_output_dir>
+```
 
 Will create `exons.bed, 3UTR.bed, 5UTR.bed, genes.bed, cds.bed` in `<output_dir>`
+
 
 ## Example
 
