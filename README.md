@@ -17,9 +17,12 @@ Will create `exons.bed, 3UTR.bed, 5UTR.bed, genes.bed, cds.bed` in `<output_dir>
 
 ## Example
 
-Download GFF(GRCh37, v25, comprehensive, CHR) from gencodegenes.org:
-```wget ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/gencode.v25.annotation.gff3.gz \
-   && gunzip gencode.v25.annotation.gff3.gz```
+- Download GFF(GRCh37, v25, comprehensive, CHR) from gencodegenes.org:
+
+```{bash}
+   wget ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/gencode.v25.annotation.gff3.gz \
+   && gunzip gencode.v25.annotation.gff3.gz
+```
 
 Create regions:
 ```create_regions_from_gencode.R gencode.v25.annotation.gff3 /path/to/GRCh37/annotation```
