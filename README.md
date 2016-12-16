@@ -34,19 +34,24 @@ Will create `exons.bed, 3UTR.bed, 5UTR.bed, genes.bed, cds.bed` in `<output_dir>
 
 We use [`GenePred`](https://genome.ucsc.edu/FAQ/FAQformat#format9) format to make the process a bit simple.
 
-    - Download [gtfToGenePred](http://hgdownload.cse.ucsc.edu/admin/exe/)
-    - Convert gtf to GenePred:
-        ```{bash}
-        gtfToGenePred gencode.v25.annotation.gtf gencode.v25.annotation.genepred
-        ```
-    - Extract `first exons`:
-        ```{bash}
-        python genepred_to_bed.py --first_exon gencode.v25.annotation.genepred
-        ```
-    - Extract `last exons`:
-        ```{bash}
-        python genepred_to_bed.py --last_exon gencode.v25.annotation.genepred
-        ```
+ - Download [gtfToGenePred](http://hgdownload.cse.ucsc.edu/admin/exe/)
+ - Convert gtf to GenePred:
+ 
+     ```{bash}
+     gtfToGenePred gencode.v25.annotation.gtf gencode.v25.annotation.genepred
+     ```
+     
+ - Extract `first exons`:
+ 
+     ```{bash}
+     python genepred_to_bed.py --first_exon gencode.v25.annotation.genepred
+     ```
+     
+ - Extract `last exons`:
+ 
+     ```{bash}
+     python genepred_to_bed.py --last_exon gencode.v25.annotation.genepred
+     ```
 
 
 ## TODO
