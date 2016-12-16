@@ -93,8 +93,10 @@ if __name__ == '__main__':
     print(len(df.columns))
     if len(df.columns)==10:
         df.columns=['name', 'chrom', 'strand', 'txStart', 'txEnd', 'cdsStart', 'cdsEnd', 'exonCount', 'exonStarts', 'exonEnds']
+    elif len(df.columns)==15:
+        df.columns=['name', 'chrom', 'strand', 'txStart', 'txEnd', 'cdsStart', 'cdsEnd', 'exonCount', 'exonStarts', 'exonEnds', 'score', 'name2', 'cdsStartStat', 'cdsEndStat', 'exonFrames']
     else:
-        df.columns=['name', 'chrom', 'strand', 'txStart', 'txEnd', 'cdsStart', 'cdsEnd', 'exonCount', 'exonStarts', 'exonEnds']
+        raise RuntimeError('Input not in GenePred format')
 
     for index, row in df.iterrows():
         record = fetch_func(row)
