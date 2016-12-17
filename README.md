@@ -56,10 +56,10 @@ We use [`GenePred`](https://genome.ucsc.edu/FAQ/FAQformat#format9) format to mak
 ## Size distribution
 
 #### Human
-[!img](images/human.png)
+![img](images/human.png)
 
 #### Mouse
-[!img](images/mouse.png)
+![img](images/mouse.png)
 
 ## TODO
 
