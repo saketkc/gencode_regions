@@ -30,7 +30,6 @@ create_df <- function(gr, filename){
 
 TxDb <- makeTxDbFromGFF(gencode_gff)
 
-
 exons.data <- unique(unlist(exons(TxDb, columns='GENEID')))
 introns.data <- unique(unlist(intronsByTranscript(TxDb)))
 fiveUTRs.data <- unique(unlist(fiveUTRsByTranscript(TxDb)))
@@ -38,7 +37,6 @@ threeUTRs.data <- unique(unlist(threeUTRsByTranscript(TxDb)))
 transcripts.data <- unique(unlist(transcripts(TxDb, columns=NULL)))
 cds.data <- unique(unlist(cds(TxDb, columns=NULL)))
 genes.data <- unique(unlist(genes(TxDb, columns='tx_name')))
-promoters.data <- unique(unlist(promoters(TxDb, upstream=1000, downstream=1000)))
 create_df_names(exons.data, file.path(output_dir, 'exons.bed'), unlist(mcols(exons.data)$GENEID))
 create_df(introns.data, file.path(output_dir, 'introns.bed'))
 create_df(introns.data, file.path(output_dir, 'introns.bed'))
@@ -46,7 +44,13 @@ create_df(fiveUTRs.data, file.path(output_dir, '5UTRs.bed'))
 create_df(threeUTRs.data, file.path(output_dir, '3UTRs.bed'))
 create_df(transcripts.data, file.path(output_dir, 'transcripts.bed'))
 create_df(cds.data, file.path(output_dir, 'cds.bed'))
-create_df(promoters.data, file.path(output_dir, 'promoters.bed'))
+
+## We still don't understand: What's a promoter?
+promoters.length <- c(1000, 2000, 3000, 4000, 5000)
+for (len in promoters.length){
+    promoters.data <- unique(unlist(promoters(TxDb, upstream=len, downstream=len)))
+    create_df(promoters.data, file.path(output_dir, paste('promoters', len, 'bed', sep='.')))
+}
 create_df_names(genes.data, file.path(output_dir, 'genes.bed'),
                 names(mcols(genes.data)$tx_name))
 
