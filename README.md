@@ -67,10 +67,13 @@ We use [`GenePred`](https://genome.ucsc.edu/FAQ/FAQformat#format9) format to mak
 
 This should be helpful:
 ![img](images/eukaryotic_regulation.png)
+
 [Source: Wikipedia](https://en.wikipedia.org/wiki/File:Gene_structure_eukaryote_2_annotated.svg)
 
 or probably this:
+
 ![img](images/transcription_elements.jpg)
+
 [Source: Biostar](https://www.biostars.org/p/47022/)
 
 
