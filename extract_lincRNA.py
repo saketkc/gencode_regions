@@ -7,14 +7,14 @@ def main(GENCODE):
     gc = GTF.dataframe(GENCODE)
 
     idx = (gc.feature == 'transcript') & (gc.transcript_type == 'lincRNA')
-    lincRNA = gc.ix[idx, ['seqname','start','end','gene_id','gene_name']]
+    lincRNA = gc.ix[idx, ['seqname','start','end','gene_id','gene_name', 'strand']]
     lincRNA.start = lincRNA.start.astype(int)
     lincRNA.end = lincRNA.end.astype(int)
     lincRNA.sort_values(by=['seqname','start','end'], inplace=True)
     lincRNA.to_csv('lincRNA.bed', sep='\t', header=False, index=False)
 
     idx = (gc.feature == 'gene') & (gc.gene_type == 'lincRNA')
-    lincRNA = gc.ix[idx, ['seqname','start','end','gene_id','gene_name']]
+    lincRNA = gc.ix[idx, ['seqname','start','end','gene_id','gene_name', 'strand']]
     lincRNA.start = lincRNA.start.astype(int)
     lincRNA.end = lincRNA.end.astype(int)
     lincRNA.sort_values(by=['seqname','start','end'], inplace=True)
