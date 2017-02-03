@@ -5,6 +5,7 @@ import pandas as pd
 
 def main(GENCODE):
     gc = GTF.dataframe(GENCODE)
+    gc.gene_id = gc.gene_id.replace(to_replace=r'\.[0-9]+', value='', regex=True)
 
     idx = (gc.feature == 'transcript') & (gc.transcript_type == 'lincRNA')
     lincRNA = gc.ix[idx, ['seqname','start','end','gene_id','gene_name', 'strand']]

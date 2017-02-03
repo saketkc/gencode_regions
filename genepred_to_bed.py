@@ -2,8 +2,8 @@
 """
 Extract first/last exon and CDS from GenePred formatted file
 """
-
 from __future__ import print_function
+import re
 import pandas
 import argparse
 import sys
@@ -28,10 +28,12 @@ def extract_first_coding_exon(row):
         for i in range(0, len(exonEnds_all)):
             ## If the end of exon is greater than the start of CDS
             if exonEnds_all[i]>=cdsStart:
+                name = re.sub(r'\.[0-9]+', '', name)
                 return '{}\t{}\t{}\t{}\t.\t{}'.format(row['chrom'], cdsStart, exonEnds_all[i], name, strand)
     if strand == '-':
         for i in range(len(exonEnds_all)-1, 0, -1):
             if (exonStarts_all[i] <= cdsEnd):
+                name = re.sub(r'\.[0-9]+', '', name)
                 return '{}\t{}\t{}\t{}\t.\t{}'.format(row['chrom'], exonStarts_all[i], cdsEnd, name, strand)
 
 def extract_last_coding_exon(row):
@@ -54,10 +56,12 @@ def extract_last_coding_exon(row):
         for i in range(len(exonEnds_all)-1, 0, -1):
             ## If the end of exon is greater than the start of CDS
             if exonEnds_all[i]<=cdsEnd and exonStarts_all[i]>=cdsStart:
+                name = re.sub(r'\.[0-9]+', '', name)
                 return '{}\t{}\t{}\t{}\t.\t{}'.format(row['chrom'], exonStarts_all[i], exonEnds_all[i], name, strand)
     if strand == '-':
         for i in range(0, len(exonStarts_all)):
             if exonStarts_all[i]>=cdsStart and exonEnds_all[i]<=cdsEnd:
+                name = re.sub(r'\.[0-9]+', '', name)
                 return '{}\t{}\t{}\t{}\t.\t{}'.format(row['chrom'], exonStarts_all[i], exonEnds_all[i], name, strand)
 
 
@@ -67,6 +71,7 @@ def get_CDS(row):
     strand = row['strand']
     name = '{}'.format(row['name'])
     if (-cdsStart+cdsEnd)>0:
+        name = re.sub(r'\.[0-9]+', '', name)
         return '{}\t{}\t{}\t{}\t.\t{}'.format(row['chrom'], cdsStart, cdsEnd, name, strand)
 
 
@@ -90,7 +95,6 @@ if __name__ == '__main__':
         fetch_func = get_CDS
 
     df = pandas.read_table(args.genepred, header=None)
-    print(len(df.columns))
     if len(df.columns)==10:
         df.columns=['name', 'chrom', 'strand', 'txStart', 'txEnd', 'cdsStart', 'cdsEnd', 'exonCount', 'exonStarts', 'exonEnds']
     elif len(df.columns)==15:
