@@ -39,21 +39,18 @@ unlist_obj <- function(obj) {
   
 TxDb <- makeTxDbFromGFF(gencode_gff)
 
-
 transcripts.data <- transcripts(TxDb, columns=c("tx_name", "gene_id"))
 anyDuplicated(elementMetadata(transcripts.data)$tx_name)
 
 tx2gene <- unlist(elementMetadata(transcripts.data)$gene_id)
 names(tx2gene) <- elementMetadata(transcripts.data)$tx_name
 
-
 threeUTRs.data <- threeUTRsByTranscript(TxDb, use.names=T)
 mcols(threeUTRs.data)$gene_id <- drop(transcripts.data$gene_id[match(names(threeUTRs.data),  transcripts.data$tx_name)])
 names(threeUTRs.data) <- tx2gene[names(threeUTRs.data)]
 
 fiveUTRs.data <- fiveUTRsByTranscript(TxDb, use.names=T)
-mcols(fiveUTRs.data)$gene_id <- drop(transcripts.data$gene_id[match(names(fiveUTRs.data),
-                                                                    transcripts.data$tx_name)])
+mcols(fiveUTRs.data)$gene_id <- drop(transcripts.data$gene_id[match(names(fiveUTRs.data), transcripts.data$tx_name)])
 names(fiveUTRs.data) <- tx2gene[names(fiveUTRs.data)]
 
 cds.data <- cdsBy(TxDb, by='tx', use.names=T)
@@ -73,8 +70,6 @@ all.cds <- unlist_obj(cds.data)
 all.fiveUTRs <- unlist_obj(fiveUTRs.data)
 all.threeUTRs <- unlist_obj(threeUTRs.data)
 
-
-
 transcripts.data <- (unlist(transcripts.data))
 exons.data <- (unlist(exons.data))
 threeUTRs.data <- (unlist(threeUTRs.data))
@@ -83,56 +78,26 @@ cds.data <- (unlist(cds.data))
 introns.data <- (unlist(introns.data))
 genes.data <- (unlist(genes.data))
 
-
-#transcripts.data <- unique(unlist(transcripts(TxDb, columns=c("tx_name", "gene_id"))))
-#exons.data <- unique(unlist(exons(TxDb, columns=c('GENEID', 'exon_rank'))))
-#introns.data <- unique(unlist(intronsByTranscript(TxDb)))
-#threeUTRs.data <- unique(unlist(threeUTRsByTranscript(TxDb, use.names=T)))
-
 ## The exon_ranks can be ambiguous, we just take the consensus: mode of exon_ranks. This is not always correct, but then this is also not wrong.
+create_df_names(exons.data, file.path(output_dir, 'exons_rank.bed'), paste(names(exons.data), lapply(mcols(exons.data)$exon_rank, Mode), sep='__')  )
+create_df_names(fiveUTRs.data, file.path(output_dir, '5UTRs_rank.bed'), paste(names(fiveUTRs.data), mcols(fiveUTRs.data)$exon_rank, sep='__'))
+create_df_names(threeUTRs.data, file.path(output_dir, '3UTRs_rank.bed'), paste(names(threeUTRs.data), mcols(threeUTRs.data)$exon_rank, sep='__') )
 
-create_df_names(exons.data, file.path(output_dir, 'exons_rank.bed'), 
-                paste(names(exons.data), lapply(mcols(exons.data)$exon_rank, Mode), sep='__')  )
-create_df_names(exons.data, file.path(output_dir, 'exons.bed'), 
-                names(exons.data))
-
-create_df_names(all.exons, file.path(output_dir, 'all.exons.bed'), names(all.exons)) 
-create_df_names(all.introns, file.path(output_dir, 'all.introns.bed'), names(all.introns))
-create_df_names(all.cds, file.path(output_dir, 'all.cds.bed'), names(all.cds))
-create_df_names(all.fiveUTRs, 
-                file.path(output_dir, 'all.fiveUTRs.bed'),
-                names(all.fiveUTRs))
-
-create_df_names(all.threeUTRs, 
-                file.path(output_dir, 'all.threeUTRs.bed'),
-                names(all.threeUTRs))
-
-
-create_df_names(fiveUTRs.data, 
-                file.path(output_dir, '5UTRs_rank.bed'), 
-                paste(names(fiveUTRs.data),
-                      mcols(fiveUTRs.data)$exon_rank, sep='__')  )
-
-
-
-create_df_names(threeUTRs.data, 
-                file.path(output_dir, '3UTRs_rank.bed'), 
-                paste(names(threeUTRs.data),
-                      mcols(threeUTRs.data)$exon_rank, sep='__')  )
-
-create_df_names(fiveUTRs.data, 
-                file.path(output_dir, '5UTRs.bed'), 
-                names(fiveUTRs.data))
-
-create_df_names(threeUTRs.data, file.path(output_dir, '3UTRs.bed'), 
-                names(threeUTRs.data))
-
-
+create_df_names(all.exons, file.path(output_dir, 'exons.bed'), names(all.exons))
+create_df_names(all.introns, file.path(output_dir, 'introns.bed'), names(all.introns))
+create_df_names(all.cds, file.path(output_dir, 'cds.bed'), names(all.cds))
+create_df_names(all.fiveUTRs, file.path(output_dir, '5UTRs.bed'), names(all.fiveUTRs))
+create_df_names(all.threeUTRs, file.path(output_dir, '3UTRs.bed'), names(all.threeUTRs))
+create_df_names(genes.data, file.path(output_dir, 'genes.bed'), names(mcols(genes.data)$tx_name))
 create_df(transcripts.data, file.path(output_dir, 'transcripts.bed'))
-create_df_names(cds.data, 
-                file.path(output_dir, 'cds.bed'), 
-               names(cds.data))
 
+tx2gene.df <- as.data.frame(tx2gene)
+rownames(tx2gene.df) <- gsub('\\.[0-9]+', '', rownames(tx2gene.df))
+tx2gene.df$tx <- rownames(tx2gene.df)
+names(tx2gene.df) <- sub("tx2gene", "gene", names(tx2gene.df))
+tx2gene.df$gene <- gsub('\\.[0-9]+', '', tx2gene.df$gene)
+tx2gene <- tx2gene[c('tx', 'gene')]
+write.table(tx2gene.df, file=file.path(output_dir, 'tx2gene.bed'), quote=F, sep='\t', row.names=F, col.names=F)
 
 ## We still don't understand: What's a promoter?
 promoters.length <- c(1000, 2000, 3000, 4000, 5000)
@@ -140,6 +105,3 @@ for (len in promoters.length){
     promoters.data <- unlist(promoters(TxDb, upstream=len, downstream=len))
     create_df(promoters.data, file.path(output_dir, paste('promoters', len, 'bed', sep='.')))
 }
-create_df_names(genes.data, file.path(output_dir, 'genes.bed'),
-                names(mcols(genes.data)$tx_name))
-
