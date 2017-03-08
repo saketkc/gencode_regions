@@ -1,3 +1,7 @@
+#!/usr/bin/env
+'''
+Extract lincRNA coordinates from GTF
+'''
 import sys
 import GTF
 import numpy as np
