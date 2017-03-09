@@ -4,6 +4,7 @@ if (length(args)!=2){
     stop('Insufficient parameters.\nUsage: ./create_regions_from_gencode.R <gff_file> <output_dir>')
 }
 suppressMessages(library(GenomicFeatures))
+suppressMessages(library(dplyr))
 gencode_gff <- args[1]
 output_dir <- args[2]
 Mode <- function(x) {
@@ -18,7 +19,10 @@ create_df_names <- function(gr, filename, record.names=NULL){
                    names= gsub('\\.[0-9]+', '', record.names),
                    scores=c(rep('.', length(gr))),
                    strands=strand(gr))
+  df <- arrange(df, seqnames, starts, ends, names)
+  df <- unique(df)
   write.table(df, file=filename, quote=F, sep='\t', row.names=F, col.names=F)
+  return(df)
 }
 
 create_df <- function(gr, filename){
@@ -28,7 +32,10 @@ create_df <- function(gr, filename){
                    names=c(rep('.', length(gr))),
                    scores=c(rep('.', length(gr))),
                    strands=strand(gr))
+  df <- arrange(df, seqnames, starts, ends, names)
+  df <- unique(df)
   write.table(df, file=filename, quote=F, sep='\t', row.names=F, col.names=F)
+  return(df)
 }
 
 unlist_obj <- function(obj) {
@@ -36,7 +43,8 @@ unlist_obj <- function(obj) {
   names(unlist.obj) <- rep(names(obj), elementNROWS(obj))
   return (unlist.obj) 
 }
-  
+
+
 TxDb <- makeTxDbFromGFF(gencode_gff)
 
 transcripts.data <- transcripts(TxDb, columns=c("tx_name", "gene_id"))
@@ -70,13 +78,14 @@ all.cds <- unlist_obj(cds.data)
 all.fiveUTRs <- unlist_obj(fiveUTRs.data)
 all.threeUTRs <- unlist_obj(threeUTRs.data)
 
-transcripts.data <- (unlist(transcripts.data))
-exons.data <- (unlist(exons.data))
-threeUTRs.data <- (unlist(threeUTRs.data))
-fiveUTRs.data <- (unlist(fiveUTRs.data))
-cds.data <- (unlist(cds.data))
-introns.data <- (unlist(introns.data))
-genes.data <- (unlist(genes.data))
+transcripts.data <- unlist(transcripts.data)
+exons.data <- unlist(exons.data)
+threeUTRs.data <- unlist(threeUTRs.data)
+fiveUTRs.data <- unlist(fiveUTRs.data)
+cds.data <- unlist(cds.data)
+introns.data <- unlist(introns.data)
+genes.data <- unlist(genes.data)
+
 
 ## The exon_ranks can be ambiguous, we just take the consensus: mode of exon_ranks. This is not always correct, but then this is also not wrong.
 create_df_names(exons.data, file.path(output_dir, 'exons_rank.bed'), paste(names(exons.data), lapply(mcols(exons.data)$exon_rank, Mode), sep='__')  )
@@ -85,7 +94,14 @@ create_df_names(threeUTRs.data, file.path(output_dir, '3UTRs_rank.bed'), paste(n
 
 create_df_names(all.exons, file.path(output_dir, 'exons.bed'), names(all.exons))
 create_df_names(all.introns, file.path(output_dir, 'introns.bed'), names(all.introns))
-create_df_names(all.cds, file.path(output_dir, 'cds.bed'), names(all.cds))
+cds.df <- create_df_names(all.cds, file.path(output_dir, 'cds.bed'), names(all.cds))
+cds.longestORF.df <- group_by(cds.df, seqnames, starts, names, scores, strands)
+cds.codons <- summarise(cds.longestORF.df, endsM = max(ends))
+
+write.table(cds.codons[c('seqnames', 'starts', 'endsM', 'names', 'scores', 'strands')], 
+            file=file.path(output_dir, 'cds_maxORF.bed'), 
+            quote=F, sep='\t', row.names=F, col.names=F)
+
 create_df_names(all.fiveUTRs, file.path(output_dir, '5UTRs.bed'), names(all.fiveUTRs))
 create_df_names(all.threeUTRs, file.path(output_dir, '3UTRs.bed'), names(all.threeUTRs))
 create_df_names(genes.data, file.path(output_dir, 'genes.bed'), names(mcols(genes.data)$tx_name))
