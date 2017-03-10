@@ -88,12 +88,12 @@ genes.data <- unlist(genes.data)
 
 
 ## The exon_ranks can be ambiguous, we just take the consensus: mode of exon_ranks. This is not always correct, but then this is also not wrong.
-create_df_names(exons.data, file.path(output_dir, 'exons_rank.bed'), paste(names(exons.data), lapply(mcols(exons.data)$exon_rank, Mode), sep='__')  )
-create_df_names(fiveUTRs.data, file.path(output_dir, '5UTRs_rank.bed'), paste(names(fiveUTRs.data), mcols(fiveUTRs.data)$exon_rank, sep='__'))
-create_df_names(threeUTRs.data, file.path(output_dir, '3UTRs_rank.bed'), paste(names(threeUTRs.data), mcols(threeUTRs.data)$exon_rank, sep='__') )
+exons.df <- create_df_names(exons.data, file.path(output_dir, 'exons_rank.bed'), paste(names(exons.data), lapply(mcols(exons.data)$exon_rank, Mode), sep='__')  )
+fiveutrs.df <- create_df_names(fiveUTRs.data, file.path(output_dir, '5UTRs_rank.bed'), paste(names(fiveUTRs.data), mcols(fiveUTRs.data)$exon_rank, sep='__'))
+threeutrs.df <- create_df_names(threeUTRs.data, file.path(output_dir, '3UTRs_rank.bed'), paste(names(threeUTRs.data), mcols(threeUTRs.data)$exon_rank, sep='__') )
 
-create_df_names(all.exons, file.path(output_dir, 'exons.bed'), names(all.exons))
-create_df_names(all.introns, file.path(output_dir, 'introns.bed'), names(all.introns))
+all_exons.df <- create_df_names(all.exons, file.path(output_dir, 'exons.bed'), names(all.exons))
+all_introns.df <- create_df_names(all.introns, file.path(output_dir, 'introns.bed'), names(all.introns))
 cds.df <- create_df_names(all.cds, file.path(output_dir, 'cds.bed'), names(all.cds))
 cds.longestORF.df <- group_by(cds.df, seqnames, starts, names, scores, strands)
 cds.codons <- summarise(cds.longestORF.df, endsM = max(ends))
@@ -102,10 +102,10 @@ write.table(cds.codons[c('seqnames', 'starts', 'endsM', 'names', 'scores', 'stra
             file=file.path(output_dir, 'cds_maxORF.bed'), 
             quote=F, sep='\t', row.names=F, col.names=F)
 
-create_df_names(all.fiveUTRs, file.path(output_dir, '5UTRs.bed'), names(all.fiveUTRs))
-create_df_names(all.threeUTRs, file.path(output_dir, '3UTRs.bed'), names(all.threeUTRs))
-create_df_names(genes.data, file.path(output_dir, 'genes.bed'), names(mcols(genes.data)$tx_name))
-create_df(transcripts.data, file.path(output_dir, 'transcripts.bed'))
+all_fiveutrs.df <- create_df_names(all.fiveUTRs, file.path(output_dir, '5UTRs.bed'), names(all.fiveUTRs))
+all_threeutrs.df <- create_df_names(all.threeUTRs, file.path(output_dir, '3UTRs.bed'), names(all.threeUTRs))
+all_genes.df <- create_df_names(genes.data, file.path(output_dir, 'genes.bed'), names(mcols(genes.data)$tx_name))
+all_transcripts.df <- create_df(transcripts.data, file.path(output_dir, 'transcripts.bed'))
 
 tx2gene.df <- as.data.frame(tx2gene)
 rownames(tx2gene.df) <- gsub('\\.[0-9]+', '', rownames(tx2gene.df))
@@ -119,5 +119,6 @@ write.table(tx2gene.df, file=file.path(output_dir, 'tx2gene.bed'), quote=F, sep=
 promoters.length <- c(1000, 2000, 3000, 4000, 5000)
 for (len in promoters.length){
     promoters.data <- unlist(promoters(TxDb, upstream=len, downstream=len))
-    create_df(promoters.data, file.path(output_dir, paste('promoters', len, 'bed', sep='.')))
+    promoters.df <- create_df(promoters.data, file.path(output_dir, paste('promoters', len, 'bed', sep='.')))
 }
+
