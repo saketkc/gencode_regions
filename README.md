@@ -77,8 +77,4 @@ or probably this:
 [Source: Biostar](https://www.biostars.org/p/47022/)
 
 
-## TODO
-
-- Get $n^{th}$ exon/intron
-
 
