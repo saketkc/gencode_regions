@@ -53,13 +53,7 @@ We use [`GenePred`](https://genome.ucsc.edu/FAQ/FAQformat#format9) format to mak
      python genepred_to_bed.py --last_exon gencode.v25.annotation.genepred
      ```
 
-## Size distribution
 
-#### Human
-![img](images/human.png)
-
-#### Mouse
-![img](images/mouse.png)
 
 
 
