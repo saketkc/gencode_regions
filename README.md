@@ -25,6 +25,9 @@ Extract 3'UTR, 5'UTR, CDS, Promoter, Genes from GTF files.
 - [sacCerR64](notebooks/sacCerR64.ipynb)
 - [WBcel235](notebooks/WBcel235.ipynb)
 
+
+ The corresponding output gzipped beds are in the [data directory](data/).
+
 # Using R
 
 ## Dependencies
