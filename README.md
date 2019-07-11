@@ -1,7 +1,9 @@
 # gencode_regions
 Extract 3'UTR, 5'UTR, CDS, Promoter, Genes from Gencode files
 
-## Depedencies
+# Using R
+
+## Dependencies
    
 - r>=3.2.1
 - [GenomicFeatures](http://bioconductor.org/packages/release/bioc/html/GenomicFeatures.html)
@@ -29,6 +31,30 @@ Will create `exons.bed, 3UTR.bed, 5UTR.bed, genes.bed, cds.bed` in `<output_dir>
 ```{bash}
 ./create_regions_from_gencode.R gencode.v25.annotation.gff3 /path/to/GRCh37/annotation
 ```
+
+# Using Python
+
+## Dependencies
+   
+- Python>=3
+- [gffutils](https://github.com/daler/gffutils)
+
+## Notebooks
+
+- [BDGP6](notebooks/BDGP6.ipynb)
+- [GRCg6](notebooks/GRCg6.ipynb)
+- [GRCz10](notebooks/GRCz10.ipynb)
+- [GRCz11](notebooks/GRCz11.ipynb)
+- [GRCh38](notebooks/hg38-v96.ipynb)
+- [MG1655](notebooks/MG1655.ipynb)
+- [GRCm10](notebooks/mm10.ipynb)
+- [Mmul8](notebooks/Mmul8.ipynb)
+- [panTro3](notebooks/panTro3.ipynb)
+- [Rnor6.0](notebooks/Rnor6.0.ipynb)
+- [sacCerR64](notebooks/sacCerR64.ipynb)
+- [WBcel235](notebooks/WBcel235.ipynb)
+
+
 
 ## First exons, Last exons
 
