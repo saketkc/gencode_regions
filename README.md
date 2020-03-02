@@ -2,6 +2,10 @@
 
 Extract 3'UTR, 5'UTR, CDS, Promoter, Genes from GTF files.
 
+# Data
+
+If you only care about the final output, they are hosted build and GTF version wise on [riboraptor](https://github.com/saketkc/riboraptor/tree/master/riboraptor/annotation).
+
 # Using Python
 
 ## Dependencies
