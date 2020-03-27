@@ -7,6 +7,9 @@ suppressMessages(library(GenomicFeatures))
 suppressMessages(library(dplyr))
 gencode_gff <- args[1]
 output_dir <- args[2]
+
+options(scipen=999)
+
 Mode <- function(x) {
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
