@@ -10,25 +10,14 @@ If you only care about the final output, they are hosted build and GTF version w
 
 ## Dependencies
    
-- Anaconda environment having `Python>=3` and `Python<=3.7`
+We recommend setting up a [conda](https://docs.conda.io/en/latest/) environment with `Python>=3` and `Python<=3.7` with [gffutils](https://github.com/daler/gffutils) `v0.9` and [pybedtools](https://daler.github.io/pybedtools):
 
-  You can set one up using the commands:
-  ```
-  conda create --name gencode_env python=3.7
-  conda activate gencode_env
-  ```    
-- [gffutils](https://github.com/daler/gffutils) `v0.9`
+```bash
+conda create --name gencode_env python=3.7
+conda activate gencode_env
+conda install -c bioconda gffutils=0.9 pybedtools
+```    
 
-   You can install it using the command:
-   ```
-   conda install -c bioconda gffutils=0.9
-   ```
-- [pybedtools](https://daler.github.io/pybedtools)
-
-  You can install it using the command:
-   ```
-   conda install -c bioconda pybedtools
-   ```
 ## Notebooks
 
 - [BDGP6](notebooks/BDGP6.ipynb)
