@@ -10,9 +10,13 @@ If you only care about the final output, they are hosted build and GTF version w
 
 ## Dependencies
    
-- Python>=3
-- [gffutils](https://github.com/daler/gffutils)
-- [pybedtools](https://daler.github.io/pybedtools)
+We recommend setting up a [conda](https://docs.conda.io/en/latest/) environment with `Python>=3` and `Python<=3.7` with [gffutils](https://github.com/daler/gffutils) `v0.9` and [pybedtools](https://daler.github.io/pybedtools):
+
+```bash
+conda create --name gencode_env python=3.7
+conda activate gencode_env
+conda install -c bioconda gffutils=0.9 pybedtools
+```    
 
 ## Notebooks
 
