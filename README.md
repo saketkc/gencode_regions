@@ -32,6 +32,7 @@ conda install -c bioconda gffutils=0.9 pybedtools
 - [Rnor6.0](notebooks/Rnor6.0.ipynb)
 - [sacCerR64](notebooks/sacCerR64.ipynb)
 - [WBcel235](notebooks/WBcel235.ipynb)
+- [Felis_catus9.0](notebooks/Felis_catus9.0.ipynb)
 
 
  The corresponding output gzipped beds are in the [data directory](data/).
