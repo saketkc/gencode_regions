@@ -62,6 +62,7 @@ class EnsemblDataManager(object):
         #Todo: think about utils.extract_gtf_file(our_file, "./")
 
 
+
 if __name__ == '__main__':
     our_object = EnsemblDataManager()
     our_object.download_gtf("felis_catus")
