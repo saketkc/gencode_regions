@@ -4,7 +4,7 @@ methods to get list of available GTF files and also to download a file from Ense
 """
 from ftplib import FTP
 from . import utils
-from consts import TEMP_DIR_NAME
+from . import consts
 import os
 
 class EnsemblDataManager(object):
@@ -52,7 +52,7 @@ class EnsemblDataManager(object):
         self.go_to_release_directory()
         self._ftp.cwd("%s/" % species_name)
         if output_dir is None:
-            output_dir = TEMP_DIR_NAME
+            output_dir = consts.TEMP_DIR_NAME
         utils.mkdir_p(output_dir)
         file_path = os.path.join(output_dir, file_name)
         with open(file_path, 'wb') as f:
