@@ -20,6 +20,7 @@ class GeneDB(object):
 
     @property
     def feature_db(self):
+        print("Feature_DB started")
         if self._feature_db is None:
             self._feature_db = gffutils.create_db(self._gtf_path, dbfn=":memory:",
                                                   merge_strategy='merge',
@@ -27,15 +28,21 @@ class GeneDB(object):
                                                   disable_infer_transcripts=True,
                                                   disable_infer_genes=True,
                                                   keep_order=True)
+        print("Feature_DB ended")
         return self._feature_db
 
     @property
     def gene_dict(self):
+        print("gene_dict started")
         if self._gene_dict is None:
             self._gene_dict = self._create_gene_dict()
+        print("gene_dict ended")
         return self._gene_dict
 
-    def features_available(self):
+    def get_available_features(self):
+        """
+        Returns the list of features the species have.
+        """
         return list(self.feature_db.featuretypes())
 
     def _create_gene_dict(self):

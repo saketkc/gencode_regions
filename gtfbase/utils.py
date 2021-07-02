@@ -4,7 +4,8 @@ This module will contain some general utility functions for our library.
 import os
 import errno
 import tarfile
-
+import gzip
+import shutil
 
 def mkdir_p(path):
     try:
@@ -16,7 +17,19 @@ def mkdir_p(path):
             raise
 
 
-def extract_gtf_file(file_name, directory):
-    file = tarfile.open(file_name)
-    file.extractall(directory)
-    file.close()
+def extract_gtf_file(file_name):
+    """
+    Extracts the .gz file and returns the name of the extracted file.
+    """
+    # file = tarfile.open(file_name)
+    # file.extractall()
+    # file.close()
+    with gzip. open(file_name, 'rb') as f_in:
+        file_name = file_name[:-3]
+        with open(file_name, 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
+    return file_name
+
+
+if __name__ == '__main__':
+    print(extract_gtf_file("Felis_catus.Felis_catus_9.0.104.gtf.gz"))

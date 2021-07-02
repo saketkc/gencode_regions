@@ -7,9 +7,15 @@ import re
 
 
 class AbstractBedToolBuilder(object):
+    """
+    Act as a Parent class for other bedtool classes.
+    """
     _feature_name = None
-    
+
     def _make_bed(self, gene_db):
+        """
+        Helper function for generate_bedtool method.
+        """
         # Todo: if self._feature_name is None: error dena ha
 
         f_bed = ""
@@ -28,6 +34,9 @@ class AbstractBedToolBuilder(object):
         return f_bed
 
     def generate_bedtool(self, gene_db):
+        """
+        Returns the desired bedtool instance.
+        """
         f_bed = self._make_bed(gene_db)
         f_bedtool = pybedtools.BedTool(f_bed, from_string=True)
         f_bedtool = f_bedtool.remove_invalid().sort()
