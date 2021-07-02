@@ -3,8 +3,7 @@ This module will contain methods to fetch data from Ensembl. It will use the FTP
 methods to get list of available GTF files and also to download a file from Ensembl FTP.
 """
 from ftplib import FTP
-from . import utils
-from . import consts
+from . import utils, consts
 import os
 
 class EnsemblDataManager(object):

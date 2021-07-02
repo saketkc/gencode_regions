@@ -1,5 +1,5 @@
-from bed_tool_builder import BedToolBuilderFactory
-from gene_db import GeneDB
+from .bed_tool_builder import BedToolBuilderFactory
+from .gene_db import GeneDB
 import os
 
 
