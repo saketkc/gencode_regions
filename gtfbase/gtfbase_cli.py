@@ -29,7 +29,7 @@ from gene_db import GeneDB
 @click.option('--download_gtf','-dgtf', is_flag=False, help="If you want gtf file to be downloaded, you need to specify build as well.")
 def main(interactive, path=None, build=None, output=".", features=None, download_gtf=None):
     """
-    Hello this is the main function and please provide the following help command
+
     """
 
     # if build is not None:

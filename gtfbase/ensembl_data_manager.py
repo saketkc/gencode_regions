@@ -3,7 +3,9 @@ This module will contain methods to fetch data from Ensembl. It will use the FTP
 methods to get list of available GTF files and also to download a file from Ensembl FTP.
 """
 from ftplib import FTP
-import utils
+from . import utils
+from consts import TEMP_DIR_NAME
+import os
 
 class EnsemblDataManager(object):
     """
@@ -43,25 +45,36 @@ class EnsemblDataManager(object):
                      file_name.endswith(".gtf.gz")]
         return gtf_files
 
-    def download_gtf(self, species_name, file_name=None, output=None):
+    def download_gtf_by_filename(self, species_name, file_name, output_dir=None):
+        """
+
+        """
+        self.go_to_release_directory()
+        self._ftp.cwd("%s/" % species_name)
+        if output_dir is None:
+            output_dir = TEMP_DIR_NAME
+        utils.mkdir_p(output_dir)
+        file_path = os.path.join(output_dir, file_name)
+        with open(file_path, 'wb') as f:
+            # Todo: handle case when file name is invalid.
+            self._ftp.retrbinary('RETR ' + file_name, f.write)
+        return utils.extract_gtf_file(file_path)
+
+    def download_gtf(self, species_name, gtf_type="", output_dir=None):
         """
         Download the desired file with refrence to species name and type.
         If provided file name, it directly downloads it.
         """
-        #Todo: type dalo abinitio wali file_name.endswith("%s.gtf.gz" % type)] yeh kar dena
-        our_file = file_name
-        if our_file is None:
-            self.go_to_release_directory()
-            self._ftp.cwd("%s/" % species_name)
-            file_list = self._ftp.nlst()
-            gtf_files = [file_name for file_name in file_list if
-                         file_name.endswith(".chr.gtf.gz")]
-            our_file = gtf_files[0]
+        self.go_to_release_directory()
+        self._ftp.cwd("%s/" % species_name)
+        file_list = self._ftp.nlst()
+        gtf_files = [file_name for file_name in file_list if
+                     file_name.endswith("%s.gtf.gz" % gtf_type)]
+        gtf_files.sort(key=lambda x: len(x))
+        # Todo: Case: gtf_files list is empty. Throw error
+        our_file = gtf_files[0]
         print(our_file)
-        with open(our_file, 'wb') as f:
-            self._ftp.retrbinary('RETR ' + our_file, f.write)
-        #Todo: we have to add functionality to output it somewhere else.
-        return utils.extract_gtf_file(our_file)
+        return self.download_gtf_by_filename(species_name, our_file, output_dir)
 
 
 if __name__ == '__main__':
