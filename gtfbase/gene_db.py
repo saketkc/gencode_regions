@@ -5,7 +5,7 @@ DefaultOrderedDictionary) and a FeatureDB object from a GTF file.
 import logging
 
 import gffutils
-from .default_ordered_dictionary import DefaultOrderedDict
+from default_ordered_dictionary import DefaultOrderedDict
 
 
 class GeneDB(object):
@@ -17,26 +17,29 @@ class GeneDB(object):
         self._gtf_path = gtf_path
         self._feature_db = None
         self._gene_dict = None
+        self._dbfn = None
 
     @property
     def feature_db(self):
-        print("Feature_DB started")
         if self._feature_db is None:
-            self._feature_db = gffutils.create_db(self._gtf_path, dbfn=":memory:",
+            print("Feature_DB started")
+            self._dbfn = self._gtf_path + ".db"
+            self._feature_db = gffutils.create_db(self._gtf_path, dbfn=self._dbfn,
                                                   merge_strategy='merge',
                                                   force=True,
                                                   disable_infer_transcripts=True,
-                                                  disable_infer_genes=True,
-                                                  keep_order=True)
-        print("Feature_DB ended")
+                                                  disable_infer_genes=True)
+            self._feature_db = gffutils.FeatureDB(self._dbfn, keep_order=True)
+            print("Feature_DB ended")
+
         return self._feature_db
 
     @property
     def gene_dict(self):
-        print("gene_dict started")
         if self._gene_dict is None:
+            print("gene_dict started")
             self._gene_dict = self._create_gene_dict()
-        print("gene_dict ended")
+            print("gene_dict ended")
         return self._gene_dict
 
     def get_available_features(self):

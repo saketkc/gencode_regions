@@ -1,9 +1,10 @@
 import click
 from simple_term_menu import TerminalMenu
-from .ensembl_data_manager import EnsemblDataManager
-from .bed_tool_builder import BedToolBuilderFactory
+from ensembl_data_manager import EnsemblDataManager
+from bed_tool_builder import BedToolBuilderFactory
 import os
-from .gene_db import GeneDB
+from gene_db import GeneDB
+from consts import TEMP_DIR_NAME
 
 
 @click.command()
@@ -80,7 +81,7 @@ def interact():
         gtf_entry_idx = gtf_menu.show()
         gtf_file_name = gtf_files[gtf_entry_idx]
     print('%s file will be used...' % gtf_file_name)
-    gtf_file_name = ensembl_object.download_gtf(species_name, gtf_file_name)
+    gtf_file_name = ensembl_object.download_gtf_by_filename(species_name, gtf_file_name)
     print("Choose features:")
     feature_list = ['exon',
                     'intron',
@@ -102,7 +103,7 @@ def interact():
     working(required_features, gtf_file_name, ".")
 
 
-def working(features, gtf, prefix):
+def working(features, gtf, prefix=TEMP_DIR_NAME):
     gene_db = GeneDB(gtf)
     for feature in features:
         print("Working on {0}".format(feature))
