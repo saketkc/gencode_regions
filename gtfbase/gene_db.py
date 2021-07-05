@@ -5,7 +5,7 @@ DefaultOrderedDictionary) and a FeatureDB object from a GTF file.
 import logging
 
 import gffutils
-from default_ordered_dictionary import DefaultOrderedDict
+from .default_ordered_dictionary import DefaultOrderedDict
 
 
 class GeneDB(object):
