@@ -67,7 +67,7 @@ def interact():
     else:
         ensembl_object = EnsemblDataManager(release)
     print("Fetching available species...")
-    species_list = ensembl_object.get_list()
+    species_list = ensembl_object.get_species_list()
     species_menu = TerminalMenu(species_list, search_key=None)
     menu_entry_index = species_menu.show()
     print("You have selected %s..." % species_list[menu_entry_index])

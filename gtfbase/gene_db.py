@@ -43,10 +43,16 @@ class GeneDB(object):
         return self._gene_dict
 
     def get_available_features(self):
+        """Provides the list of features the species have.
+        Parameters
+        ----------
+
+        Returns
+        --------
+        available_features: str
         """
-        Returns the list of features the species have.
-        """
-        return list(self.feature_db.featuretypes())
+        available_features = list(self.feature_db.featuretypes())
+        return available_features
 
     def _create_gene_dict(self):
         '''

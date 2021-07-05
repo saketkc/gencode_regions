@@ -34,8 +34,14 @@ class AbstractBedToolBuilder(object):
         return f_bed
 
     def generate_bedtool(self, gene_db):
-        """
-        Returns the desired bedtool instance.
+        """Provides the desired feature bedtool instance.
+        Parameters
+        ----------
+        gene_db: geneDB instance.
+
+        Returns
+        --------
+        f_bedtool: bedtool instance.
         """
         f_bed = self._make_bed(gene_db)
         f_bedtool = pybedtools.BedTool(f_bed, from_string=True)

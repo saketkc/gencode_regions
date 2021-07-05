@@ -6,6 +6,7 @@ from ftplib import FTP
 from . import utils, consts
 import os
 
+
 class EnsemblDataManager(object):
     """
     """
@@ -18,36 +19,63 @@ class EnsemblDataManager(object):
         self._ftp.login()
 
     def go_to_release_directory(self):
-        """
-        Changes ftp directory to release directory.
+        """Changes ftp directory to release directory.
+        Parameters
+        ----------
+
+        Returns
+        --------
         """
         if self._release != "current":
             self._ftp.cwd("/pub/realease-%s/gtf/" % self._release)
         else:
             self._ftp.cwd("/pub/current_gtf/")
 
-    def get_list(self):
-        """
-        Returns the list of species for the given build from ensembl.
+    def get_species_list(self):
+        """Provides the list of species for the given build from ensembl.
+        Parameters
+        ----------
+
+        Returns
+        --------
+        species_list: str
         """
         self.go_to_release_directory()
-        return self._ftp.nlst()
+        species_list = self._ftp.nlst()
+        return species_list
 
     def get_gtf_list(self, species_name):
+        """Provides the list of different types of gtfs currently available with the given species.
+        Parameters
+        ----------
+        species_name: str
+
+        Returns
+        --------
+        gtf_list: str
         """
-        Provides the list of different types of gtfs, the species have.
-        """
+        species_name = species_name.lower()
         self.go_to_release_directory()
         self._ftp.cwd(species_name)
         file_list = self._ftp.nlst()
-        gtf_files = [file_name for file_name in file_list if
-                     file_name.endswith(".gtf.gz")]
-        return gtf_files
+        gtf_list = [file_name for file_name in file_list if
+                    file_name.endswith(".gtf.gz")]
+        return gtf_list
 
     def download_gtf_by_filename(self, species_name, file_name, output_dir=None):
-        """
+        """Downloads at the given location and provides the name of desired file with reference to the given species and
+         file name.
+        Parameters
+        ----------
+        species_name: str
+        file_name: str
+        output_dir: str
 
+        Returns
+        --------
+        extracted_file_name: str
         """
+        species_name = species_name.lower()
         self.go_to_release_directory()
         self._ftp.cwd("%s/" % species_name)
         if output_dir is None:
@@ -57,13 +85,24 @@ class EnsemblDataManager(object):
         with open(file_path, 'wb') as f:
             # Todo: handle case when file name is invalid.
             self._ftp.retrbinary('RETR ' + file_name, f.write)
-        return utils.extract_gtf_file(file_path)
+        extracted_file_name = utils.extract_gtf_file(file_path)
+        return extracted_file_name
 
     def download_gtf(self, species_name, gtf_type="", output_dir=None):
+        """Downloads at the given location and provides the name of desired file with reference to species name and type
+         of gtf.
+         If you already have name of the file use method "download_gtf_by_filename()".
+        Parameters
+        ----------
+        species_name: str
+        gtf_type: str
+        output_dir: str
+
+        Returns
+        --------
+        extracted_file_name: str
         """
-        Download the desired file with refrence to species name and type.
-        If provided file name, it directly downloads it.
-        """
+        species_name = species_name.lower()
         self.go_to_release_directory()
         self._ftp.cwd("%s/" % species_name)
         file_list = self._ftp.nlst()
@@ -73,7 +112,8 @@ class EnsemblDataManager(object):
         # Todo: Case: gtf_files list is empty. Throw error
         our_file = gtf_files[0]
         print(our_file)
-        return self.download_gtf_by_filename(species_name, our_file, output_dir)
+        extracted_file_name = self.download_gtf_by_filename(species_name, our_file, output_dir)
+        return extracted_file_name
 
 
 if __name__ == '__main__':
