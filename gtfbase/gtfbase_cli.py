@@ -1,10 +1,10 @@
 import click
 from simple_term_menu import TerminalMenu
-from ensembl_data_manager import EnsemblDataManager
-from bed_tool_builder import BedToolBuilderFactory
+from .ensembl_data_manager import EnsemblDataManager
+from .bed_tool_builder import BedToolBuilderFactory
 import os
-from gene_db import GeneDB
-from consts import TEMP_DIR_NAME
+from .gene_db import GeneDB
+from .consts import TEMP_DIR_NAME
 
 
 @click.command()
