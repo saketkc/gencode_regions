@@ -3,7 +3,7 @@ This module will contain methods to create a Gene Dictionary (of type
 DefaultOrderedDictionary) and a FeatureDB object from a GTF file.
 """
 import logging
-
+from tqdm import tqdm
 import gffutils
 from .default_ordered_dictionary import DefaultOrderedDict
 
@@ -59,7 +59,7 @@ class GeneDB(object):
         Store each feature line db.all_features() as a dict of dicts
         '''
         gene_dict = DefaultOrderedDict(lambda: DefaultOrderedDict(lambda: DefaultOrderedDict(list)))
-        for line_no, feature in enumerate(self.feature_db.all_features()):
+        for line_no, feature in tqdm(enumerate(self.feature_db.all_features())):
             gene_ids = feature.attributes['gene_id']
             feature_type = feature.featuretype
             if feature_type == 'gene':
@@ -72,8 +72,8 @@ class GeneDB(object):
             else:
                 transcript_ids = feature.attributes['transcript_id']
 
-                for gene_id in gene_ids:
-                    for transcript_id in transcript_ids:
+                for gene_id in tqdm(gene_ids):
+                    for transcript_id in tqdm(transcript_ids):
                         gene_dict[gene_id][transcript_id][feature_type].append(feature)
         return gene_dict
 

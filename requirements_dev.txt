@@ -10,3 +10,4 @@ twine==1.14.0
 Click==7.0
 gffutils==0.9
 pybedtools
+tqdm
