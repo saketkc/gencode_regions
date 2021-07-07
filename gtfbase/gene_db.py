@@ -72,8 +72,8 @@ class GeneDB(object):
             else:
                 transcript_ids = feature.attributes['transcript_id']
 
-                for gene_id in tqdm(gene_ids):
-                    for transcript_id in tqdm(transcript_ids):
+                for gene_id in gene_ids:
+                    for transcript_id in transcript_ids:
                         gene_dict[gene_id][transcript_id][feature_type].append(feature)
         return gene_dict
 
