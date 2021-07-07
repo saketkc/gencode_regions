@@ -22,7 +22,7 @@ class GeneDB(object):
     @property
     def feature_db(self):
         if self._feature_db is None:
-            print("Feature_DB started")
+            print("Feature_DB started and it can take about 5 minutes to complete.")
             self._dbfn = self._gtf_path + ".db"
             self._feature_db = gffutils.create_db(self._gtf_path, dbfn=self._dbfn,
                                                   merge_strategy='merge',
@@ -30,16 +30,12 @@ class GeneDB(object):
                                                   disable_infer_transcripts=True,
                                                   disable_infer_genes=True)
             self._feature_db = gffutils.FeatureDB(self._dbfn, keep_order=True)
-            print("Feature_DB ended")
-
         return self._feature_db
 
     @property
     def gene_dict(self):
         if self._gene_dict is None:
-            print("gene_dict started")
             self._gene_dict = self._create_gene_dict()
-            print("gene_dict ended")
         return self._gene_dict
 
     def get_available_features(self):
@@ -59,7 +55,7 @@ class GeneDB(object):
         Store each feature line db.all_features() as a dict of dicts
         '''
         gene_dict = DefaultOrderedDict(lambda: DefaultOrderedDict(lambda: DefaultOrderedDict(list)))
-        for line_no, feature in tqdm(enumerate(self.feature_db.all_features())):
+        for line_no, feature in tqdm(enumerate(self.feature_db.all_features()), total=len(self.feature_db.all_features())):
             gene_ids = feature.attributes['gene_id']
             feature_type = feature.featuretype
             if feature_type == 'gene':
