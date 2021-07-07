@@ -55,7 +55,7 @@ class GeneDB(object):
         Store each feature line db.all_features() as a dict of dicts
         '''
         gene_dict = DefaultOrderedDict(lambda: DefaultOrderedDict(lambda: DefaultOrderedDict(list)))
-        for line_no, feature in tqdm(enumerate(self.feature_db.all_features()), total=len(self.feature_db.all_features())):
+        for line_no, feature in enumerate(tqdm(self.feature_db.all_features())):
             gene_ids = feature.attributes['gene_id']
             feature_type = feature.featuretype
             if feature_type == 'gene':
