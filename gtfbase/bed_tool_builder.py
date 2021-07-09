@@ -139,7 +139,7 @@ class IntronBedToolBuilder(AbstractBedToolBuilder):
 
 
 class FivePrimeUtrBedToolBuilder(AbstractBedToolBuilder):
-    _feature_name = '5utr'
+    _feature_name = 'five_prime_utr'
 
     def generate_bedtool(self, gene_db):
         utr5_bed = self._make_bed(gene_db)
@@ -150,7 +150,7 @@ class FivePrimeUtrBedToolBuilder(AbstractBedToolBuilder):
 
 
 class ThreePrimeUtrCdsBedToolBuilder(AbstractBedToolBuilder):
-    _feature_name = '3utr'
+    _feature_name = 'three_prime_utr'
 
     def generate_bedtool(self, gene_db):
         utr3_bed = self._make_bed(gene_db)
