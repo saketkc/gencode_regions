@@ -24,7 +24,11 @@ from consts import TEMP_DIR_NAME
                                  '5utr',
                                  '3utr',
                                  'start_codon',
-                                 'stop_codon'
+                                 'stop_codon',
+                                 '3utr_exon',
+                                 "3utr_intron",
+                                 '5utr_exon',
+                                 '5utr_intron',
                                  'all',
                                  'none']), multiple='true')
 @click.option('--download_gtf','-dgtf', is_flag=False, help="If you want gtf file to be downloaded, you need to specify build as well.")
@@ -32,16 +36,6 @@ def main(interactive, path=None, build=None, output=".", features=None, download
     """
 
     """
-
-    # if build is not None:
-    #     name, release = build
-    #     click.echo(f"name of the species {name} and the build id is {release}")
-    #
-    # if path is not None:
-    #     click.echo(f"{path}")
-    #
-    # if features is not None:
-    #     click.echo(f"Hello {features}")
     if interactive:
         interact()
         return
@@ -90,7 +84,11 @@ def interact():
                     '5utr',
                     '3utr',
                     'start_codon',
-                    'stop_codon']
+                    'stop_codon',
+                    '3utr_exon',
+                    "3utr_intron",
+                    '5utr_exon',
+                    '5utr_intron']
 
     feature_menu = TerminalMenu(
         feature_list, multi_select=True,
@@ -106,10 +104,10 @@ def interact():
 def working(features, gtf, prefix=TEMP_DIR_NAME):
     gene_db = GeneDB(gtf)
     for feature in features:
-        print("Working on {0}".format(feature))
-        f_bedtool = BedToolBuilderFactory.get_builder(feature).generate_bedtool(gene_db)
+        # print("Working on {0}".format(feature))
+        f_bedtool = BedToolBuilderFactory.get_builder(feature)._generate_bedtool_helper(gene_db)
         f_bedtool.saveas(os.path.join(prefix, '%s.bed.gz' % feature))
-        print("Done {0}".format(feature))
+        # print("Done {0}".format(feature))
 
 
 if __name__ == '__main__':

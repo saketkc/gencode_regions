@@ -118,4 +118,4 @@ class EnsemblDataManager(object):
 
 if __name__ == '__main__':
     our_object = EnsemblDataManager()
-    our_object.download_gtf("felis_catus")
+    help(our_object.get_species_list)

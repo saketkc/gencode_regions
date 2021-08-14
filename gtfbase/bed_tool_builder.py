@@ -4,6 +4,8 @@ Gene Dictionary.
 """
 import pybedtools
 import re
+import numpy as num
+import functools
 
 
 class AbstractBedToolBuilder(object):
@@ -19,20 +21,21 @@ class AbstractBedToolBuilder(object):
         # Todo: if self._feature_name is None: error dena ha
 
         f_bed = ""
-        for gene_id in gene_db.get_gene_list():
+        for transcript_id in gene_db.get_gene_list():
             f_regions = []
-            for feature in gene_db.gene_dict[gene_id].keys():
+            for feature in gene_db.gene_dict[transcript_id].keys():
                 if feature == 'gene':
                     continue
-                f = list(gene_db.gene_dict[gene_id][feature][self._feature_name])
+                f = list(gene_db.gene_dict[transcript_id][feature][self._feature_name])
                 f_regions += f
 
             merged_f = self._merge_regions(gene_db.feature_db, f_regions)
-            renamed_f = self._rename_regions(merged_f, gene_id)
+            renamed_f = self._rename_regions(merged_f, transcript_id)
             f_bed += self._create_bed(renamed_f)
 
         return f_bed
 
+    @functools.lru_cache(maxsize=5)
     def generate_bedtool(self, gene_db):
         """Provides the desired feature bedtool instance.
         Parameters
@@ -43,10 +46,69 @@ class AbstractBedToolBuilder(object):
         --------
         f_bedtool: bedtool instance.
         """
+        print("hello")
+        self._generate_bedtool_helper(gene_db)
+
+    def _generate_bedtool_helper(self, gene_db):
         f_bed = self._make_bed(gene_db)
         f_bedtool = pybedtools.BedTool(f_bed, from_string=True)
         f_bedtool = f_bedtool.remove_invalid().sort()
         return f_bedtool
+
+    def _create_bed(self, regions, bedtype='0'):
+        '''Create bed from list of regions
+        bedtype: 0 or 1
+            0-Based or 1-based coordinate of the BED
+        '''
+        bedstr = ''
+        for region in regions:
+            assert len(region.attributes['transcript_id']) == 1
+            ## GTF start is 1-based, so shift by one while writing
+            ## to 0-based BED format
+            if bedtype == '0':
+                start = region.start - 1
+            else:
+                start = region.start
+            bedstr += '{}\t{}\t{}\t{}\t{}\t{}\n'.format(region.chrom,
+                                                        start,
+                                                        region.stop,
+                                                        re.sub('\.\d+', '', region.attributes['transcript_id'][0]),
+                                                        '.',
+                                                        region.strand)
+        return bedstr
+
+    def _rename_regions(self, regions, transcript_id):
+        regions = list(regions)
+        if len(regions) == 0:
+            return []
+        for region in regions:
+            region.attributes['transcript_id'] = transcript_id
+        return regions
+
+    def _merge_regions(self, db, regions):
+        if len(regions) == 0:
+            return []
+        merged = db.merge(sorted(list(regions), key=lambda x: x.start))
+        return merged
+
+    def _merge_regions_nostrand(self, db, regions):
+        if len(regions) == 0:
+            return []
+        merged = db.merge(sorted(list(regions), key=lambda x: x.start), ignore_strand=True)
+        return merged
+
+
+class GeneBedToolBuilder(AbstractBedToolBuilder):
+    _feature_name = 'gene'
+
+    def _make_bed(self, gene_db):
+        gene_list = []
+        for transcript_id in gene_db.get_gene_list():
+            gene_list.append(gene_db.gene_dict[transcript_id]['gene'])
+
+        gene_bed = self._create_bed(gene_list)
+
+        return gene_bed
 
     def _create_bed(self, regions, bedtype='0'):
         '''Create bed from list of regions
@@ -70,39 +132,6 @@ class AbstractBedToolBuilder(object):
                                                         region.strand)
         return bedstr
 
-    def _rename_regions(self, regions, gene_id):
-        regions = list(regions)
-        if len(regions) == 0:
-            return []
-        for region in regions:
-            region.attributes['gene_id'] = gene_id
-        return regions
-
-    def _merge_regions(self, db, regions):
-        if len(regions) == 0:
-            return []
-        merged = db.merge(sorted(list(regions), key=lambda x: x.start))
-        return merged
-
-    def _merge_regions_nostrand(self, db, regions):
-        if len(regions) == 0:
-            return []
-        merged = db.merge(sorted(list(regions), key=lambda x: x.start), ignore_strand=True)
-        return merged
-
-
-class GeneBedToolBuilder(AbstractBedToolBuilder):
-    _feature_name = 'gene'
-
-    def _make_bed(self, gene_db):
-        gene_list = []
-        for gene_id in gene_db.get_gene_list():
-            gene_list.append(gene_db.gene_dict[gene_id]['gene'])
-
-        gene_bed = self._create_bed(gene_list)
-
-        return gene_bed
-
 
 class CdsBedToolBuilder(AbstractBedToolBuilder):
     _feature_name = 'CDS'
@@ -118,20 +147,20 @@ class IntronBedToolBuilder(AbstractBedToolBuilder):
     def _make_bed(self, gene_db):
         intron_bed = ''
 
-        for gene_id in gene_db.get_gene_list():
+        for transcript_id in gene_db.get_gene_list():
             f_regions = []
             intron_regions = []
-            for feature in gene_db.gene_dict[gene_id].keys():
+            for feature in gene_db.gene_dict[transcript_id].keys():
                 if feature == 'gene':
                     continue
-                f = list(gene_db.gene_dict[gene_id][feature][self._feature_name])
+                f = list(gene_db.gene_dict[transcript_id][feature][self._feature_name])
                 merged_f = self._merge_regions(gene_db.feature_db, f)
                 introns = gene_db.feature_db.interfeatures(merged_f)
                 f_regions += f
                 intron_regions += introns
 
             merged_introns = self._merge_regions(gene_db.feature_db, intron_regions)
-            renamed_introns = self._rename_regions(merged_introns, gene_id)
+            renamed_introns = self._rename_regions(merged_introns, transcript_id)
 
             intron_bed += self._create_bed(renamed_introns)
 
@@ -141,10 +170,10 @@ class IntronBedToolBuilder(AbstractBedToolBuilder):
 class FivePrimeUtrBedToolBuilder(AbstractBedToolBuilder):
     _feature_name = 'five_prime_utr'
 
-    def generate_bedtool(self, gene_db):
+    def _generate_bedtool_helper(self, gene_db):
         utr5_bed = self._make_bed(gene_db)
         utr5_bedtool = pybedtools.BedTool(utr5_bed, from_string=True)
-        cds_bedtool = CdsBedToolBuilder().generate_bedtool(gene_db)
+        cds_bedtool = CdsBedToolBuilder()._generate_bedtool_helper(gene_db)
         utr5_bedtool = utr5_bedtool.subtract(cds_bedtool).remove_invalid().sort()
         return utr5_bedtool
 
@@ -152,10 +181,10 @@ class FivePrimeUtrBedToolBuilder(AbstractBedToolBuilder):
 class ThreePrimeUtrCdsBedToolBuilder(AbstractBedToolBuilder):
     _feature_name = 'three_prime_utr'
 
-    def generate_bedtool(self, gene_db):
+    def _generate_bedtool_helper(self, gene_db):
         utr3_bed = self._make_bed(gene_db)
         utr3_bedtool = pybedtools.BedTool(utr3_bed, from_string=True)
-        cds_bedtool = CdsBedToolBuilder().generate_bedtool(gene_db)
+        cds_bedtool = CdsBedToolBuilder()._generate_bedtool_helper(gene_db)
         utr3_bedtool = utr3_bedtool.subtract(cds_bedtool).remove_invalid().sort()
         return utr3_bedtool
 
@@ -165,14 +194,14 @@ class StartCodonBedToolBuilder(AbstractBedToolBuilder):
 
     def _make_bed(self, gene_db):
         f_bed = ""
-        for gene_id in gene_db.get_gene_list():
+        for transcript_id in gene_db.get_gene_list():
             f_regions = []
-            for feature in gene_db.feature_db.children(gene_id, featuretype=self._feature_name):
+            for feature in gene_db.feature_db.children(transcript_id, featuretype=self._feature_name):
                 feature.stop = feature.start
                 f_regions.append(feature)
 
             merged_f = self._merge_regions(gene_db.feature_db, f_regions)
-            renamed_f = self._rename_regions(merged_f, gene_id)
+            renamed_f = self._rename_regions(merged_f, transcript_id)
             f_bed += self._create_bed(renamed_f)
 
         return f_bed
@@ -183,23 +212,218 @@ class StopCodonBedToolBuilder(AbstractBedToolBuilder):
 
     def _make_bed(self, gene_db):
         f_bed = ""
-        for gene_id in gene_db.get_gene_list():
+        for transcript_id in gene_db.get_gene_list():
             f_regions = []
-            for feature in gene_db.feature_db.children(gene_id, featuretype=self._feature_name):
+            for feature in gene_db.feature_db.children(transcript_id, featuretype=self._feature_name):
                 feature.start = feature.stop
                 feature.stop = feature.stop + 1
                 f_regions.append(feature)
 
             merged_f = self._merge_regions(gene_db.feature_db, f_regions)
-            renamed_f = self._rename_regions(merged_f, gene_id)
+            renamed_f = self._rename_regions(merged_f, transcript_id)
             f_bed += self._create_bed(renamed_f)
 
         return f_bed
 
 
+class ThreeUtrExonBedToolBuilder(AbstractBedToolBuilder):
+
+    def _generate_bedtool_helper(self, gene_db):
+        '''Create bed from list of regions
+        bedtype: 0 or 1
+            0-Based or 1-based coordinate of the BED
+        '''
+        utr3_bedtool = BedToolBuilderFactory.get_builder("3utr")._generate_bedtool_helper(gene_db)
+        exon_bedtool = BedToolBuilderFactory.get_builder("exon")._generate_bedtool_helper(gene_db)
+        exon_df = exon_bedtool.to_dataframe()
+        cnt = 0
+        bedstr = ""
+        exon_list = exon_df["start"]
+        # print(exon_list)
+        for utr3 in utr3_bedtool.features():
+            start = int(utr3[1])
+            stop = int(utr3[2])
+            # first  = bisect.bisect_right(exon_list, start, lo=0, hi=len(exon_list))
+            first = num.searchsorted(exon_list, start, side='left')
+            #   e_start =start
+            # Todo: ask what we have to do if an exon has already started but utr is starting.
+            for i in range(first, len(exon_list)):
+                e_start = exon_df["start"][i]
+                e_stop = exon_df["end"][i]
+
+                if e_stop > stop:
+                    break
+                cnt = cnt + 1
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(exon_df["chrom"][i],
+                                                                e_start,
+                                                                e_stop,
+                                                                exon_df["name"][i],
+                                                                exon_df["score"][i],
+                                                                exon_df["strand"][i], cnt)
+
+            if e_start < stop:
+                cnt = cnt + 1
+                e_stop = stop + 3  # exons are cut at the end of
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(exon_df["chrom"][i],
+                                                                e_start,
+                                                                e_stop,
+                                                                exon_df["name"][i],
+                                                                exon_df["score"][i],
+                                                                exon_df["strand"][i], cnt)
+
+        f_bedtool = pybedtools.BedTool(bedstr, from_string=True)
+        return f_bedtool
+
+
+class ThreeUtrIntronBedToolBuilder(AbstractBedToolBuilder):
+
+    def _generate_bedtool_helper(self, gene_db):
+        '''Create bed from list of regions
+        bedtype: 0 or 1
+            0-Based or 1-based coordinate of the BED
+        '''
+        utr3_bedtool = BedToolBuilderFactory.get_builder("3utr")._generate_bedtool_helper(gene_db)
+        intron_bedtool = BedToolBuilderFactory.get_builder("intron")._generate_bedtool_helper(gene_db)
+        intron_df = intron_bedtool.to_dataframe()
+        cnt = 0
+        bedstr = ""
+        intron_list = intron_df["start"]
+        # print(exon_list)
+        for utr3 in utr3_bedtool.features():
+            start = int(utr3[1])
+            stop = int(utr3[2])
+            # first  = bisect.bisect_right(exon_list, start, lo=0, hi=len(exon_list))
+            first = num.searchsorted(intron_list, start, side='left')
+            #   e_start =start
+            # Todo: ask what we have to do if an exon has already started but utr is starting.
+            for i in range(first, len(intron_list)):
+                i_start = intron_df["start"][i]
+                i_stop = intron_df["end"][i]
+
+                if i_stop > stop:
+                    break
+                cnt = cnt + 1
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(intron_df["chrom"][i],
+                                                                i_start,
+                                                                i_stop,
+                                                                intron_df["name"][i],
+                                                                intron_df["score"][i],
+                                                                intron_df["strand"][i], cnt)
+
+        if i_start < stop:
+            i_stop = stop + 3  # exons are cut at the end of
+            cnt = cnt + 1
+            bedstr += '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(intron_df["chrom"][i],
+                                                            i_start,
+                                                            i_stop,
+                                                            intron_df["name"][i],
+                                                            intron_df["score"][i],
+                                                            intron_df["strand"][i], cnt)
+
+        f_bedtool = pybedtools.BedTool(bedstr, from_string=True)
+        return f_bedtool
+
+
+class FiveUtrExonBedToolBuilder(AbstractBedToolBuilder):
+
+    def _generate_bedtool_helper(self, gene_db):
+        '''Create bed from list of regions
+        bedtype: 0 or 1
+            0-Based or 1-based coordinate of the BED
+        '''
+        utr5_bedtool = BedToolBuilderFactory.get_builder("5utr")._generate_bedtool_helper(gene_db)
+        exon_bedtool = BedToolBuilderFactory.get_builder("exon")._generate_bedtool_helper(gene_db)
+        exon_df = exon_bedtool.to_dataframe()
+        cnt = 0
+        bedstr = ""
+        exon_list = exon_df["start"]
+        # print(exon_list)
+        for utr5 in utr5_bedtool.features():
+            start = int(utr5[1])
+            stop = int(utr5[2])
+            # first  = bisect.bisect_right(exon_list, start, lo=0, hi=len(exon_list))
+            first = num.searchsorted(exon_list, start, side='left')
+            #   e_start =start
+            # Todo: ask what we have to do if an exon has already started but utr is starting.
+            for i in range(first, len(exon_list)):
+                e_start = exon_df["start"][i]
+                e_stop = exon_df["end"][i]
+
+                if e_stop > stop:
+                    break
+                cnt = cnt + 1
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(exon_df["chrom"][i],
+                                                                e_start,
+                                                                e_stop,
+                                                                exon_df["name"][i],
+                                                                exon_df["score"][i],
+                                                                exon_df["strand"][i], cnt)
+
+            if e_start < stop:
+                e_stop = stop + 3  # exons are cut at the end of
+                cnt = cnt + 1
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(exon_df["chrom"][i],
+                                                                e_start,
+                                                                e_stop,
+                                                                exon_df["name"][i],
+                                                                exon_df["score"][i],
+                                                                exon_df["strand"][i], cnt)
+
+        f_bedtool = pybedtools.BedTool(bedstr, from_string=True)
+        return f_bedtool
+
+class FiveUtrIntronBedToolBuilder(AbstractBedToolBuilder):
+
+    def _generate_bedtool_helper(self, gene_db):
+        '''Create bed from list of regions
+        bedtype: 0 or 1
+            0-Based or 1-based coordinate of the BED
+        '''
+        utr5_bedtool = BedToolBuilderFactory.get_builder("5utr")._generate_bedtool_helper(gene_db)
+        intron_bedtool = BedToolBuilderFactory.get_builder("intron")._generate_bedtool_helper(gene_db)
+        intron_df = intron_bedtool.to_dataframe()
+        cnt = 0
+        bedstr = ""
+        intron_list = intron_df["start"]
+        # print(exon_list)
+        for utr5 in utr5_bedtool.features():
+            start = int(utr5[1])
+            stop = int(utr5[2])
+            first = num.searchsorted(intron_list, start, side='left')
+            #   e_start =start
+            # Todo: ask what we have to do if an exon has already started but utr is starting.
+            for i in range(first, len(intron_list)):
+                i_start = intron_df["start"][i]
+                i_stop = intron_df["end"][i]
+
+                if i_stop > stop:
+                    break
+                cnt = cnt + 1
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(intron_df["chrom"][i],
+                                                                i_start,
+                                                                i_stop,
+                                                                intron_df["name"][i],
+                                                                intron_df["score"][i],
+                                                                intron_df["strand"][i], cnt)
+
+            if i_start < stop:
+                i_stop = stop + 3  # exons are cut at the end of
+                cnt = cnt + 1
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(intron_df["chrom"][i],
+                                                                i_start,
+                                                                i_stop,
+                                                                intron_df["name"][i],
+                                                                intron_df["score"][i],
+                                                                intron_df["strand"][i], cnt)
+
+
+        f_bedtool = pybedtools.BedTool(bedstr, from_string=True)
+        return f_bedtool
+
+
 class BedToolBuilderFactory(object):
     """
-    This class act as a factory, which delivers object corresponding to the feature.
+    The class act as a factory, which delivers object corresponding to the feature.
     """
 
     _builders = {
@@ -210,7 +434,11 @@ class BedToolBuilderFactory(object):
         "5utr": FivePrimeUtrBedToolBuilder,
         "3utr": ThreePrimeUtrCdsBedToolBuilder,
         "start_codon": StartCodonBedToolBuilder,
-        "stop_codon": StopCodonBedToolBuilder
+        "stop_codon": StopCodonBedToolBuilder,
+        "3utr_exon": ThreeUtrExonBedToolBuilder,
+        "3utr_intron": ThreeUtrIntronBedToolBuilder,
+        "5utr_exon": FiveUtrExonBedToolBuilder,
+        "5utr_intron": FiveUtrIntronBedToolBuilder
     }
 
     @staticmethod
