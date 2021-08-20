@@ -17,7 +17,11 @@ class AbstractBedToolBuilder(object):
     def _make_bed(self, gene_db):
         """
         Helper function for generate_bedtool method.
+        :param gene_db: geneDB instance
+        :return: The bed file content string, will be used to generate a bedtool.
+        :rtype: str
         """
+
         # Todo: if self._feature_name is None: error dena ha
 
         f_bed = ""
@@ -37,28 +41,46 @@ class AbstractBedToolBuilder(object):
 
     @functools.lru_cache(maxsize=5)
     def generate_bedtool(self, gene_db):
-        """Provides the desired feature bedtool instance.
-        Parameters
-        ----------
-        gene_db: geneDB instance.
-
-        Returns
-        --------
-        f_bedtool: bedtool instance.
         """
-        print("hello")
-        self._generate_bedtool_helper(gene_db)
+        Provides the desired feature bedtool instance.
+
+        :param gene_db: geneDB instance.
+        :return: bedtool instance.
+        """
+        return self._generate_bedtool_helper(gene_db)
 
     def _generate_bedtool_helper(self, gene_db):
+        """
+        Helper function for generate_bedtool()
+
+        :param gene_db: geneDB instance.
+        :return: bedtool instance.
+        """
         f_bed = self._make_bed(gene_db)
         f_bedtool = pybedtools.BedTool(f_bed, from_string=True)
         f_bedtool = f_bedtool.remove_invalid().sort()
+        f_bedtool = self._add_score_field(f_bedtool)
+        return f_bedtool
+
+    def _add_score_field(self, f_bedtool):
+        """
+
+        :param f_bedtool:
+        :return:
+        """
+        cnt = 0
+        for data in f_bedtool.features():
+            cnt += 1
+            data[4] = cnt
         return f_bedtool
 
     def _create_bed(self, regions, bedtype='0'):
-        '''Create bed from list of regions
-        bedtype: 0 or 1
+        '''
+        Create bed from list of regions
+        :param bedtype: 0 or 1
             0-Based or 1-based coordinate of the BED
+        :param regions: Regions for which the bed will be created
+        :return: bed string
         '''
         bedstr = ''
         for region in regions:
@@ -69,10 +91,17 @@ class AbstractBedToolBuilder(object):
                 start = region.start - 1
             else:
                 start = region.start
+
             bedstr += '{}\t{}\t{}\t{}\t{}\t{}\n'.format(region.chrom,
                                                         start,
                                                         region.stop,
-                                                        re.sub('\.\d+', '', region.attributes['transcript_id'][0]),
+                                                        # re.sub('\.\d+', '', region.attributes['transcript_id'][0]),
+                                                        # region.attributes['transcript_id'][0]+'_'+region.attributes['gene_id'][0]+'_'+region.attributes['gene_name'][0],
+                                                        region.attributes['transcript_id'][0],
+                                                        # + '_' +
+                                                        # region.attributes['gene_id'][0],
+                                                        # + '_' +
+                                                        # region.attributes['gene_name'][0],
                                                         '.',
                                                         region.strand)
         return bedstr
@@ -86,12 +115,18 @@ class AbstractBedToolBuilder(object):
         return regions
 
     def _merge_regions(self, db, regions):
+        """
+        This methood is used to merge regions.
+        """
         if len(regions) == 0:
             return []
         merged = db.merge(sorted(list(regions), key=lambda x: x.start))
         return merged
 
     def _merge_regions_nostrand(self, db, regions):
+        """
+        This methood is used to merge regions while ignoring the strand.
+        """
         if len(regions) == 0:
             return []
         merged = db.merge(sorted(list(regions), key=lambda x: x.start), ignore_strand=True)
@@ -99,6 +134,9 @@ class AbstractBedToolBuilder(object):
 
 
 class GeneBedToolBuilder(AbstractBedToolBuilder):
+    """
+    This Class will build the Bedtool instance for gene feature.
+    """
     _feature_name = 'gene'
 
     def _make_bed(self, gene_db):
@@ -134,14 +172,23 @@ class GeneBedToolBuilder(AbstractBedToolBuilder):
 
 
 class CdsBedToolBuilder(AbstractBedToolBuilder):
+    """
+    This Class will build the Bedtool instance for cds feature.
+    """
     _feature_name = 'CDS'
 
 
 class ExonBedToolBuilder(AbstractBedToolBuilder):
+    """
+    This Class will build the Bedtool instance for exon feature.
+    """
     _feature_name = 'exon'
 
 
 class IntronBedToolBuilder(AbstractBedToolBuilder):
+    """
+    This Class will build the Bedtool instance for intron feature.
+    """
     _feature_name = 'exon'
 
     def _make_bed(self, gene_db):
@@ -168,6 +215,9 @@ class IntronBedToolBuilder(AbstractBedToolBuilder):
 
 
 class FivePrimeUtrBedToolBuilder(AbstractBedToolBuilder):
+    """
+    This Class will build the Bedtool instance for 5'utr feature.
+    """
     _feature_name = 'five_prime_utr'
 
     def _generate_bedtool_helper(self, gene_db):
@@ -179,6 +229,9 @@ class FivePrimeUtrBedToolBuilder(AbstractBedToolBuilder):
 
 
 class ThreePrimeUtrCdsBedToolBuilder(AbstractBedToolBuilder):
+    """
+    This Class will build the Bedtool instance for 3'utr feature.
+    """
     _feature_name = 'three_prime_utr'
 
     def _generate_bedtool_helper(self, gene_db):
@@ -190,6 +243,9 @@ class ThreePrimeUtrCdsBedToolBuilder(AbstractBedToolBuilder):
 
 
 class StartCodonBedToolBuilder(AbstractBedToolBuilder):
+    """
+    This Class will build the Bedtool instance for start codon feature.
+    """
     _feature_name = 'start_codon'
 
     def _make_bed(self, gene_db):
@@ -208,6 +264,9 @@ class StartCodonBedToolBuilder(AbstractBedToolBuilder):
 
 
 class StopCodonBedToolBuilder(AbstractBedToolBuilder):
+    """
+    This Class will build the Bedtool instance for stop codon feature.
+    """
     _feature_name = 'stop_codon'
 
     def _make_bed(self, gene_db):
@@ -227,11 +286,13 @@ class StopCodonBedToolBuilder(AbstractBedToolBuilder):
 
 
 class ThreeUtrExonBedToolBuilder(AbstractBedToolBuilder):
+    """
+    This Class will build a Bedtool instance for all the exons present in 3'utr.
+    """
 
     def _generate_bedtool_helper(self, gene_db):
-        '''Create bed from list of regions
-        bedtype: 0 or 1
-            0-Based or 1-based coordinate of the BED
+        '''
+        Uses 3'utr and exon bedtool to generate bedtool for all the exons present in 3'utr.
         '''
         utr3_bedtool = BedToolBuilderFactory.get_builder("3utr")._generate_bedtool_helper(gene_db)
         exon_bedtool = BedToolBuilderFactory.get_builder("exon")._generate_bedtool_helper(gene_db)
@@ -254,33 +315,35 @@ class ThreeUtrExonBedToolBuilder(AbstractBedToolBuilder):
                 if e_stop > stop:
                     break
                 cnt = cnt + 1
-                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(exon_df["chrom"][i],
-                                                                e_start,
-                                                                e_stop,
-                                                                exon_df["name"][i],
-                                                                exon_df["score"][i],
-                                                                exon_df["strand"][i], cnt)
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\n'.format(exon_df["chrom"][i],
+                                                            e_start,
+                                                            e_stop,
+                                                            exon_df["name"][i],
+                                                            cnt,
+                                                            exon_df["strand"][i])
 
             if e_start < stop:
                 cnt = cnt + 1
                 e_stop = stop + 3  # exons are cut at the end of
-                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(exon_df["chrom"][i],
-                                                                e_start,
-                                                                e_stop,
-                                                                exon_df["name"][i],
-                                                                exon_df["score"][i],
-                                                                exon_df["strand"][i], cnt)
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\n'.format(exon_df["chrom"][i],
+                                                            e_start,
+                                                            e_stop,
+                                                            exon_df["name"][i],
+                                                            cnt,
+                                                            exon_df["strand"][i])
 
         f_bedtool = pybedtools.BedTool(bedstr, from_string=True)
         return f_bedtool
 
 
 class ThreeUtrIntronBedToolBuilder(AbstractBedToolBuilder):
+    """
+    This Class will build a Bedtool instance for all the introns present in 3'utr.
+    """
 
     def _generate_bedtool_helper(self, gene_db):
-        '''Create bed from list of regions
-        bedtype: 0 or 1
-            0-Based or 1-based coordinate of the BED
+        '''
+        Uses 3'utr and intron bedtool to generate bedtool for all the introns present in 3'utr.
         '''
         utr3_bedtool = BedToolBuilderFactory.get_builder("3utr")._generate_bedtool_helper(gene_db)
         intron_bedtool = BedToolBuilderFactory.get_builder("intron")._generate_bedtool_helper(gene_db)
@@ -303,33 +366,35 @@ class ThreeUtrIntronBedToolBuilder(AbstractBedToolBuilder):
                 if i_stop > stop:
                     break
                 cnt = cnt + 1
-                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(intron_df["chrom"][i],
-                                                                i_start,
-                                                                i_stop,
-                                                                intron_df["name"][i],
-                                                                intron_df["score"][i],
-                                                                intron_df["strand"][i], cnt)
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\n'.format(intron_df["chrom"][i],
+                                                            i_start,
+                                                            i_stop,
+                                                            intron_df["name"][i],
+                                                            cnt,
+                                                            intron_df["strand"][i])
 
         if i_start < stop:
             i_stop = stop + 3  # exons are cut at the end of
             cnt = cnt + 1
-            bedstr += '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(intron_df["chrom"][i],
-                                                            i_start,
-                                                            i_stop,
-                                                            intron_df["name"][i],
-                                                            intron_df["score"][i],
-                                                            intron_df["strand"][i], cnt)
+            bedstr += '{}\t{}\t{}\t{}\t{}\t{}\n'.format(intron_df["chrom"][i],
+                                                        i_start,
+                                                        i_stop,
+                                                        intron_df["name"][i],
+                                                        cnt,
+                                                        intron_df["strand"][i])
 
         f_bedtool = pybedtools.BedTool(bedstr, from_string=True)
         return f_bedtool
 
 
 class FiveUtrExonBedToolBuilder(AbstractBedToolBuilder):
+    """
+    This Class will build a Bedtool instance for all the exons present in 5'utr.
+    """
 
     def _generate_bedtool_helper(self, gene_db):
-        '''Create bed from list of regions
-        bedtype: 0 or 1
-            0-Based or 1-based coordinate of the BED
+        '''
+        Uses 5'utr and exon bedtool to generate bedtool for all the exons present in 5'utr.
         '''
         utr5_bedtool = BedToolBuilderFactory.get_builder("5utr")._generate_bedtool_helper(gene_db)
         exon_bedtool = BedToolBuilderFactory.get_builder("exon")._generate_bedtool_helper(gene_db)
@@ -352,32 +417,35 @@ class FiveUtrExonBedToolBuilder(AbstractBedToolBuilder):
                 if e_stop > stop:
                     break
                 cnt = cnt + 1
-                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(exon_df["chrom"][i],
-                                                                e_start,
-                                                                e_stop,
-                                                                exon_df["name"][i],
-                                                                exon_df["score"][i],
-                                                                exon_df["strand"][i], cnt)
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\n'.format(exon_df["chrom"][i],
+                                                            e_start,
+                                                            e_stop,
+                                                            exon_df["name"][i],
+                                                            cnt,
+                                                            exon_df["strand"][i])
 
             if e_start < stop:
                 e_stop = stop + 3  # exons are cut at the end of
                 cnt = cnt + 1
-                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(exon_df["chrom"][i],
-                                                                e_start,
-                                                                e_stop,
-                                                                exon_df["name"][i],
-                                                                exon_df["score"][i],
-                                                                exon_df["strand"][i], cnt)
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\n'.format(exon_df["chrom"][i],
+                                                            e_start,
+                                                            e_stop,
+                                                            exon_df["name"][i],
+                                                            cnt,
+                                                            exon_df["strand"][i])
 
         f_bedtool = pybedtools.BedTool(bedstr, from_string=True)
         return f_bedtool
 
+
 class FiveUtrIntronBedToolBuilder(AbstractBedToolBuilder):
+    """
+    This Class will build a Bedtool instance for all the introns present in 5'utr.
+    """
 
     def _generate_bedtool_helper(self, gene_db):
-        '''Create bed from list of regions
-        bedtype: 0 or 1
-            0-Based or 1-based coordinate of the BED
+        '''
+        Uses 5'utr and intron bedtool to generate bedtool for all the introns present in 5'utr.
         '''
         utr5_bedtool = BedToolBuilderFactory.get_builder("5utr")._generate_bedtool_helper(gene_db)
         intron_bedtool = BedToolBuilderFactory.get_builder("intron")._generate_bedtool_helper(gene_db)
@@ -399,23 +467,22 @@ class FiveUtrIntronBedToolBuilder(AbstractBedToolBuilder):
                 if i_stop > stop:
                     break
                 cnt = cnt + 1
-                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(intron_df["chrom"][i],
-                                                                i_start,
-                                                                i_stop,
-                                                                intron_df["name"][i],
-                                                                intron_df["score"][i],
-                                                                intron_df["strand"][i], cnt)
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\n'.format(intron_df["chrom"][i],
+                                                            i_start,
+                                                            i_stop,
+                                                            intron_df["name"][i],
+                                                            cnt,
+                                                            intron_df["strand"][i])
 
             if i_start < stop:
                 i_stop = stop + 3  # exons are cut at the end of
                 cnt = cnt + 1
-                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(intron_df["chrom"][i],
-                                                                i_start,
-                                                                i_stop,
-                                                                intron_df["name"][i],
-                                                                intron_df["score"][i],
-                                                                intron_df["strand"][i], cnt)
-
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\n'.format(intron_df["chrom"][i],
+                                                            i_start,
+                                                            i_stop,
+                                                            intron_df["name"][i],
+                                                            cnt,
+                                                            intron_df["strand"][i])
 
         f_bedtool = pybedtools.BedTool(bedstr, from_string=True)
         return f_bedtool
@@ -443,6 +510,11 @@ class BedToolBuilderFactory(object):
 
     @staticmethod
     def get_builder(feature):
+        """
+        The method provides the desired bedtoolfactory object.
+
+        :param feature: The feature for which the factory is required.
+        :type feature: str
+        :return: BedtoolFactory instance.
+        """
         return BedToolBuilderFactory._builders[feature]()
-
-
