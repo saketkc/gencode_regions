@@ -25,11 +25,11 @@ class GeneDB(object):
         if self._feature_db is None:
             print("Feature_DB started and it can take about 5 minutes to complete.")
             self._dbfn = self._gtf_path + ".db"
-            # self._feature_db = gffutils.create_db(self._gtf_path, dbfn=self._dbfn,
-            #                                       merge_strategy='merge',
-            #                                       force=True,
-            #                                       disable_infer_transcripts=True,
-            #                                       disable_infer_genes=True,verbose=True)
+            self._feature_db = gffutils.create_db(self._gtf_path, dbfn=self._dbfn,
+                                                  merge_strategy='merge',
+                                                  force=True,
+                                                  disable_infer_transcripts=True,
+                                                  disable_infer_genes=True,verbose=True)
             self._feature_db = gffutils.FeatureDB(self._dbfn, keep_order=True)
         return self._feature_db
 

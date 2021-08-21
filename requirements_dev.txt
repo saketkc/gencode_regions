@@ -11,3 +11,4 @@ Click==7.0
 gffutils==0.9
 pybedtools
 tqdm
+simple_term_menu
