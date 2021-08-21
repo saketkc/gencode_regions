@@ -1,10 +1,16 @@
 import click
 from simple_term_menu import TerminalMenu
-from ensembl_data_manager import EnsemblDataManager
-from bed_tool_builder import BedToolBuilderFactory
+# from ensembl_data_manager import EnsemblDataManager
+# from bed_tool_builder import BedToolBuilderFactory
+# import os
+# from gene_db import GeneDB
+# from consts import TEMP_DIR_NAME
+from gtfbase.ensembl_data_manager import EnsemblDataManager
+from gtfbase.bed_tool_builder import BedToolBuilderFactory
 import os
-from gene_db import GeneDB
-from consts import TEMP_DIR_NAME
+from gtfbase.gene_db import GeneDB
+from gtfbase.consts import TEMP_DIR_NAME
+
 
 
 @click.command()
@@ -16,7 +22,7 @@ from consts import TEMP_DIR_NAME
                                                "If you want the current release, put release as 0.\n"
                                                "Either path or build should be passed")
 @click.option("--output", "-o", type=str, help="if you want to keep the bed files in any other directory, else not required")
-@click.option('--features','-f',
+@click.option('--features', '-f',
               type=click.Choice(['exons',
                                  'introns',
                                  'gene',
@@ -105,7 +111,7 @@ def working(features, gtf, prefix=TEMP_DIR_NAME):
     gene_db = GeneDB(gtf)
     for feature in features:
         # print("Working on {0}".format(feature))
-        f_bedtool = BedToolBuilderFactory.get_builder(feature)._generate_bedtool_helper(gene_db)
+        f_bedtool = BedToolBuilderFactory.get_builder(feature).generate_bedtool_helper(gene_db)
         f_bedtool.saveas(os.path.join(prefix, '%s.bed.gz' % feature))
         # print("Done {0}".format(feature))
 

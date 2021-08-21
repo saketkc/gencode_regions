@@ -5,6 +5,7 @@ DefaultOrderedDictionary) and a FeatureDB object from a GTF file.
 import logging
 from tqdm import tqdm
 import gffutils
+# from default_ordered_dictionary import DefaultOrderedDict
 from .default_ordered_dictionary import DefaultOrderedDict
 
 
@@ -24,11 +25,11 @@ class GeneDB(object):
         if self._feature_db is None:
             print("Feature_DB started and it can take about 5 minutes to complete.")
             self._dbfn = self._gtf_path + ".db"
-            self._feature_db = gffutils.create_db(self._gtf_path, dbfn=self._dbfn,
-                                                  merge_strategy='merge',
-                                                  force=True,
-                                                  disable_infer_transcripts=True,
-                                                  disable_infer_genes=True,verbose=True)
+            # self._feature_db = gffutils.create_db(self._gtf_path, dbfn=self._dbfn,
+            #                                       merge_strategy='merge',
+            #                                       force=True,
+            #                                       disable_infer_transcripts=True,
+            #                                       disable_infer_genes=True,verbose=True)
             self._feature_db = gffutils.FeatureDB(self._dbfn, keep_order=True)
         return self._feature_db
 
@@ -39,13 +40,11 @@ class GeneDB(object):
         return self._gene_dict
 
     def get_available_features(self):
-        """Provides the list of features the species have.
-        Parameters
-        ----------
+        """
+        Provides the list of features the species have.
 
-        Returns
-        --------
-        available_features: str
+        :return: available_features
+        :rtype: str
         """
         available_features = list(self.feature_db.featuretypes())
         return available_features
@@ -75,4 +74,7 @@ class GeneDB(object):
         return gene_dict
 
     def get_gene_list(self):
+        """
+        returns gene list.
+        """
         return list(set(self.gene_dict.keys()))
