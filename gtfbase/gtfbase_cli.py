@@ -111,7 +111,7 @@ def working(features, gtf, prefix=TEMP_DIR_NAME):
     gene_db = GeneDB(gtf)
     for feature in features:
         # print("Working on {0}".format(feature))
-        f_bedtool = BedToolBuilderFactory.get_builder(feature).generate_bedtool_helper(gene_db)
+        f_bedtool = BedToolBuilderFactory.get_builder(feature).generate_bedtool(gene_db)
         f_bedtool.saveas(os.path.join(prefix, '%s.bed.gz' % feature))
         # print("Done {0}".format(feature))
 

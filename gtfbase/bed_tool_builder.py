@@ -64,14 +64,22 @@ class AbstractBedToolBuilder(object):
 
     def _add_score_field(self, f_bedtool):
         """
-
-        :param f_bedtool:
-        :return:
+        Update the score field of the bedtool
+        :param f_bedtool: feature bedtool
         """
-        cnt = 0
-        for data in f_bedtool.features():
-            cnt += 1
-            data[4] = cnt
+
+        def get_count_generator():
+            cnt = 1
+            while True:
+                yield cnt
+                cnt += 1
+        cnt_generator = get_count_generator()
+
+        def update_feature(feature, arg=cnt_generator):
+            feature.score = next(arg)
+            return feature
+
+        f_bedtool = f_bedtool.each(update_feature, cnt_generator)
         return f_bedtool
 
     def _create_bed(self, regions, bedtype='0'):
