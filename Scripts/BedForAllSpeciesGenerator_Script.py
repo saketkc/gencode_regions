@@ -44,7 +44,10 @@ def script(version):
       path = os.path.join(".", "SpeciesBed", "%s%s" % (species, version))   #
       mkdir_p(path)
       try:
-        ensembl_object = EnsemblDataManager()
+        if version != "":
+            ensembl_object = EnsemblDataManager()
+        else:
+            ensembl_object = EnsemblDataManager(version)
         gtf = ensembl_object.download_gtf(species)
         features = ['exon',
                     'intron',
