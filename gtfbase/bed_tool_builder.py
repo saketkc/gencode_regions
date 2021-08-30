@@ -6,6 +6,7 @@ import pybedtools
 import re
 import numpy as num
 import functools
+from gtfbase.utils import FeatureNameError
 
 
 class AbstractBedToolBuilder(object):
@@ -22,7 +23,7 @@ class AbstractBedToolBuilder(object):
         :rtype: str
         """
 
-        # Todo: if self._feature_name is None: error dena ha
+
 
         f_bed = ""
         for transcript_id in gene_db.get_gene_list():
@@ -314,8 +315,16 @@ class ThreeUtrExonBedToolBuilder(AbstractBedToolBuilder):
             stop = int(utr3[2])
             # first  = bisect.bisect_right(exon_list, start, lo=0, hi=len(exon_list))
             first = num.searchsorted(exon_list, start, side='left')
-            #   e_start =start
-            # Todo: ask what we have to do if an exon has already started but utr is starting.
+
+            if start < exon_df["end"][first]:
+                cnt = cnt + 1
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\n'.format(exon_df["chrom"][first],
+                                                            start+3,
+                                                            exon_df["end"][first],
+                                                            exon_df["name"][first],
+                                                            cnt,
+                                                            exon_df["strand"][first])
+
             for i in range(first, len(exon_list)):
                 e_start = exon_df["start"][i]
                 e_stop = exon_df["end"][i]
@@ -365,8 +374,16 @@ class ThreeUtrIntronBedToolBuilder(AbstractBedToolBuilder):
             stop = int(utr3[2])
             # first  = bisect.bisect_right(exon_list, start, lo=0, hi=len(exon_list))
             first = num.searchsorted(intron_list, start, side='left')
-            #   e_start =start
-            # Todo: ask what we have to do if an exon has already started but utr is starting.
+
+            if start < intron_df["end"][first]:
+                cnt = cnt + 1
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\n'.format(intron_df["chrom"][first],
+                                                            start+3,
+                                                            intron_df["end"][first],
+                                                            intron_df["name"][first],
+                                                            cnt,
+                                                            intron_df["strand"][first])
+
             for i in range(first, len(intron_list)):
                 i_start = intron_df["start"][i]
                 i_stop = intron_df["end"][i]
@@ -416,8 +433,16 @@ class FiveUtrExonBedToolBuilder(AbstractBedToolBuilder):
             stop = int(utr5[2])
             # first  = bisect.bisect_right(exon_list, start, lo=0, hi=len(exon_list))
             first = num.searchsorted(exon_list, start, side='left')
-            #   e_start =start
-            # Todo: ask what we have to do if an exon has already started but utr is starting.
+
+            if start < exon_df["end"][first]:
+                cnt = cnt + 1
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\n'.format(exon_df["chrom"][first],
+                                                            start+3,
+                                                            exon_df["end"][first],
+                                                            exon_df["name"][first],
+                                                            cnt,
+                                                            exon_df["strand"][first])
+
             for i in range(first, len(exon_list)):
                 e_start = exon_df["start"][i]
                 e_stop = exon_df["end"][i]
@@ -466,8 +491,16 @@ class FiveUtrIntronBedToolBuilder(AbstractBedToolBuilder):
             start = int(utr5[1])
             stop = int(utr5[2])
             first = num.searchsorted(intron_list, start, side='left')
-            #   e_start =start
-            # Todo: ask what we have to do if an exon has already started but utr is starting.
+
+            if start < intron_df["end"][first]:
+                cnt = cnt + 1
+                bedstr += '{}\t{}\t{}\t{}\t{}\t{}\n'.format(intron_df["chrom"][first],
+                                                            start+3,
+                                                            intron_df["end"][first],
+                                                            intron_df["name"][first],
+                                                            cnt,
+                                                            intron_df["strand"][first])
+
             for i in range(first, len(intron_list)):
                 i_start = intron_df["start"][i]
                 i_stop = intron_df["end"][i]
@@ -525,4 +558,8 @@ class BedToolBuilderFactory(object):
         :type feature: str
         :return: BedtoolFactory instance.
         """
+
+        if feature not in BedToolBuilderFactory._builders:
+            raise FeatureNameError("BedToolBuilder for feature name %s not found." % feature)
+
         return BedToolBuilderFactory._builders[feature]()

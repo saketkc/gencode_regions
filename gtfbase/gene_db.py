@@ -5,7 +5,6 @@ DefaultOrderedDictionary) and a FeatureDB object from a GTF file.
 import logging
 from tqdm import tqdm
 import gffutils
-# from default_ordered_dictionary import DefaultOrderedDict
 from gtfbase.default_ordered_dictionary import DefaultOrderedDict
 
 

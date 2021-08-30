@@ -3,10 +3,8 @@ This module will contain methods to fetch data from Ensembl. It will use the FTP
 methods to get list of available GTF files and also to download a file from Ensembl FTP.
 """
 from ftplib import FTP
-from gtfbase.utils import mkdir_p, extract_gtf_file
+from gtfbase.utils import mkdir_p, extract_gtf_file, SpeciesNameError
 from gtfbase.consts import TEMP_DIR_NAME
-# from utils import mkdir_p, extract_gtf_file
-# from consts import TEMP_DIR_NAME
 import os
 
 
@@ -54,7 +52,10 @@ class EnsemblDataManager(object):
         """
         species_name = species_name.lower()
         self.go_to_release_directory()
-        self._ftp.cwd(species_name)
+        try:
+            self._ftp.cwd("%s/" % species_name)
+        except:
+            raise SpeciesNameError("The species name %s is invalid." % species_name)
         file_list = self._ftp.nlst()
         gtf_list = [file_name for file_name in file_list if
                     file_name.endswith(".gtf.gz")]
@@ -75,13 +76,15 @@ class EnsemblDataManager(object):
         """
         species_name = species_name.lower()
         self.go_to_release_directory()
-        self._ftp.cwd("%s/" % species_name)
+        try:
+            self._ftp.cwd("%s/" % species_name)
+        except:
+            raise SpeciesNameError("The species name %s is invalid." % species_name)
         if output_dir is None:
             output_dir = TEMP_DIR_NAME
         mkdir_p(output_dir)
         file_path = os.path.join(output_dir, file_name)
         with open(file_path, 'wb') as f:
-            # Todo: handle case when file name is invalid.
             self._ftp.retrbinary('RETR ' + file_name, f.write)
         extracted_file_name = extract_gtf_file(file_path)
         return extracted_file_name
@@ -103,12 +106,14 @@ class EnsemblDataManager(object):
         """
         species_name = species_name.lower()
         self.go_to_release_directory()
-        self._ftp.cwd("%s/" % species_name)
+        try:
+            self._ftp.cwd("%s/" % species_name)
+        except:
+            raise SpeciesNameError("The species name %s is invalid." % species_name)
         file_list = self._ftp.nlst()
         gtf_files = [file_name for file_name in file_list if
                      file_name.endswith("%s.gtf.gz" % gtf_type)]
         gtf_files.sort(key=lambda x: len(x))
-        # Todo: Case: gtf_files list is empty. Throw error
         our_file = gtf_files[0]
         print(our_file)
         extracted_file_name = self.download_gtf_by_filename(species_name, our_file, output_dir)

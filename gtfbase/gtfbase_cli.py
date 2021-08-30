@@ -1,10 +1,5 @@
 import click
 from simple_term_menu import TerminalMenu
-# from ensembl_data_manager import EnsemblDataManager
-# from bed_tool_builder import BedToolBuilderFactory
-# import os
-# from gene_db import GeneDB
-# from consts import TEMP_DIR_NAME
 from gtfbase.ensembl_data_manager import EnsemblDataManager
 from gtfbase.bed_tool_builder import BedToolBuilderFactory
 import os
@@ -110,10 +105,8 @@ def interact():
 def working(features, gtf, prefix=TEMP_DIR_NAME):
     gene_db = GeneDB(gtf)
     for feature in features:
-        # print("Working on {0}".format(feature))
         f_bedtool = BedToolBuilderFactory.get_builder(feature).generate_bedtool(gene_db)
         f_bedtool.saveas(os.path.join(prefix, '%s.bed.gz' % feature))
-        # print("Done {0}".format(feature))
 
 
 if __name__ == '__main__':

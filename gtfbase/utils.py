@@ -27,5 +27,13 @@ def extract_gtf_file(file_name):
     return file_name
 
 
+class FeatureNameError(Exception):
+    pass
+
+
+class SpeciesNameError(Exception):
+    pass
+
+
 if __name__ == '__main__':
     print(extract_gtf_file("Felis_catus.Felis_catus_9.0.104.gtf.gz"))
