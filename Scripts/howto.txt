@@ -1,0 +1,33 @@
+The script for Bedfilesforallspecies will help you get species beds for all the species in the folder the scripts are with just a click.
+You can specify the release version, for example, the latest is 104. So, you can type 104 in that.  
+If you want to add any specific species you can add them in the species_list script and the program will handle them on its own.
+
+Then you can use the Zenodo script to upload the Version and after that, you can simply delete the folder.
+
+Colab version "https://colab.research.google.com/drive/1CZHNyw2gTOnclG0EjtEz8ngszBdGLPp3?authuser=0"
+
+-----------------------------------Zenodo---------------------------------
+
+https://colab.research.google.com/drive/153I-gIpWibg1Yn6gxHt4SPDSN2qIHLqt
+----------------------------------First Deposition--------------------
+For making first time deposition.
+Go to Zenodo UI and then to upload, 
+Click on new upload.
+Fill the form. 
+
+Follow Guide Under XYZ tag
+-----------------------------------------------New Version-------------------------------------------------------
+Go to the New version.
+
+
+Follow Guide Under XYZ tag
+
+-----------------------------XYZ-----------------------
+Get the id from the Doi. ( id will the number after the "zenodo.")
+Replace the id in the script.
+
+
+Play the script
+-----------------------------
+Go to the Zenodo UI to check everything is uploaded, ( sometimes colab stops on it own ).
+Hit publish.
